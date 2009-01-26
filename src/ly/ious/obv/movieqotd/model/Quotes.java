@@ -17,18 +17,17 @@ import org.javaforge.sql.Column;
 import com.blipnetworks.sql.SQLBuilder;
 
 /**
- * Created by IntelliJ IDEA.
- * User: jklett
- * Date: Jan 24, 2009
- * Time: 6:54:49 PM
- * To change this template use File | Settings | File Templates.
+ * TODO
+ *
+ * @author Jared Klett
+ * @version $Id: Quotes.java,v 1.2 2009/01/26 04:29:49 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.1 $";
+    public static final String CVS_REV = "$Revision: 1.2 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
