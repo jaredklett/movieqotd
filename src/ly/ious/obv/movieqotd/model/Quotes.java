@@ -27,14 +27,14 @@ import java.util.Date;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.3 2009/02/04 02:02:20 jklett Exp $
+ * @version $Id: Quotes.java,v 1.4 2009/02/04 03:25:42 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.3 $";
+    public static final String CVS_REV = "$Revision: 1.4 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ public class Quotes {
     public static final Column MID = new Column("mid", TABLE);
     public static final Column QUOTE_TEXT = new Column("quote_text", TABLE);
     public static final Column USED = new Column("used", TABLE);
-    public static final Column USED_DATESTAMP = new Column("used_datestamp", TABLE);
+    public static final Column USED_DATESTAMP = new Column("used_timestamp", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////
 
@@ -53,22 +53,22 @@ public class Quotes {
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
 
-    public static final Object[] WHERE_GET_QUOTE_BY_MID = {
-            MID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
+    private static final Object[] WHERE_GET_QUOTE_BY_QID = {
+            QID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
     };
 
     /** Generated SQL which loads all the rows in the table. */
-    public static final String SQL_SELECT = SQLBuilder.buildSelect(
+    private static final String SQL_SELECT = SQLBuilder.buildSelect(
             new Table[] {TABLE},
             ALL_COLUMNS,
             null
     );
 
-    public static final String SQL_GET_QUOTE_BY_MID = SQLBuilder.buildSelect(
+    private static final String SQL_GET_QUOTE_BY_QID = SQLBuilder.buildSelect(
             new Table[] {TABLE},
             ALL_COLUMNS,
-            WHERE_GET_QUOTE_BY_MID
-            );
+            WHERE_GET_QUOTE_BY_QID
+    );
 
 // Instance variables /////////////////////////////////////////////////////////
 
@@ -86,10 +86,10 @@ public class Quotes {
 
 // Class methods //////////////////////////////////////////////////////////////
 
-    public static Quotes getQuote(Connection connection, int mid) throws SQLException {
+    public static Quotes getQuote(Connection connection, int qid) throws SQLException {
         Quotes quote = null;
-        Object[] values = { mid };
-        ResultSet rs = SQLExec.doQuery(connection, SQL_GET_QUOTE_BY_MID, values);
+        Object[] values = { qid };
+        ResultSet rs = SQLExec.doQuery(connection, SQL_GET_QUOTE_BY_QID, values);
         if (rs.next())
             quote = setParams(rs);
         rs.close();
@@ -97,11 +97,11 @@ public class Quotes {
     }
 
     /**
-     * Convenience method to create a new <code>Conversion</code> object and
+     * Convenience method to create a new <code>Quotes</code> object and
      * populate it with the fields from the passed result set.
      *
      * @param rs The <code>ResultSet</code> to get the values from.
-     * @return A newly populated <code>Conversion</code> object.
+     * @return A newly populated <code>Quotes</code> object.
      * @throws SQLException If a database access error occurs.
      */
     private static Quotes setParams(ResultSet rs) throws SQLException {
@@ -114,6 +114,8 @@ public class Quotes {
         quote.setUsedDatestamp(rs.getDate(++i));
         return quote;
     }
+
+// Accessors //////////////////////////////////////////////////////////////////
 
     public int getQid() {
         return qid;
@@ -134,6 +136,8 @@ public class Quotes {
     public Date getUsedDatestamp() {
         return usedDatestamp;
     }
+
+// Mutators ///////////////////////////////////////////////////////////////////
 
     public void setQid(int qid) {
         this.qid = qid;
