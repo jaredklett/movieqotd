@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<poolman>
+
+    <!-- No JMX -->
+    <management-mode>local</management-mode>
+
+    <!-- Our main production database for Blip.tv -->
+    <datasource>
+                <dbname>obviously_production</dbname>
+                <jndiName>obviously_production</jndiName>
+                <driver>com.mysql.jdbc.Driver</driver>
+                <!--<url>jdbc:mysql://master.db.pokkari.net:3309/blip_production</url>-->
+                <url>jdbc:mysql://127.0.0.1:3306/obviously</url>
+
+                <username>obviously</username>
+                <password>lentur57</password>
+
+                <minimumSize>2</minimumSize>
+                <maximumSize>20</maximumSize>
+                <connectionTimeout>600</connectionTimeout>
+                <userTimeout>12</userTimeout>
+                <shrinkBy>10</shrinkBy>
+
+                <nativeResults>true</nativeResults>
+
+                <logFile>/home/jklett/movieqotd/blip_production-poolman.log</logFile>
+                <debugging>false</debugging>
+
+                <cacheEnabled>false</cacheEnabled>
+
+                <validationQuery>SELECT 1</validationQuery>
+                <initialConnectionSQL>SELECT 1</initialConnectionSQL>
+                <removeOnExceptions>true</removeOnExceptions>
+    </datasource>
+
+</poolman>
