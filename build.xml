@@ -1,0 +1,47 @@
+<!-- $Id: build.xml,v 1.1 2009/02/14 19:50:00 jklett Exp $ -->
+<project name="MovieQOTD" default="build" basedir=".">
+    <property name="temp" value="temp" />
+    <property name="etc" value="etc"/>
+    <property name="lib" value="lib" />
+    <property name="src" value="src" />
+	<property name="build" value="classes" />
+    <property name="jarfile" value="movieqotd.jar" />
+    <property name="metainf" value="**/META-INF/" />
+
+    <path id="classpath">
+		<pathelement path="${lib}/blipsql.jar:${lib}/javaforge.jar:${lib}/jdom.jar:${lib}/junit.jar:${lib}/logback-classic-0.9.6.jar:${lib}/logback-core-0.9.6.jar:${lib}/rome-0.9.jar:${lib}/slf4j-api-1.5.0.jar:${lib}/twitter4j.jar:${lib}/log4j.jar" />
+	</path>
+
+    <target name="compile">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}" />
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="${src}" destdir="${build}" debug="on" deprecation="off">
+            <classpath refid="classpath" />
+        </javac>
+    </target>
+
+	<target name="package" depends="compile">
+        <mkdir dir="${temp}"/>
+        <copy todir="${temp}">
+            <fileset dir="${build}"/>
+        </copy>
+        <copy todir="${temp}">
+            <fileset dir="${etc}">
+                <include name="**/*.*" />
+            </fileset>
+        </copy>
+        <!-- expand library jars -->
+        <unjar dest="${temp}">
+            <patternset>
+                <exclude name="${metainf}" />
+            </patternset>
+            <fileset dir="${lib}">
+                <include name="**/*.jar" />
+            </fileset>
+        </unjar>
+		<jar destfile="${jarfile}" basedir="${temp}" manifest="${etc}/MainClass" />
+	</target>
+
+	<target name="build" depends="package" />
+</project>
