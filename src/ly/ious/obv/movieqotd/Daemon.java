@@ -30,7 +30,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.4 2009/02/14 20:28:11 jklett Exp $
+ * @version $Id: Daemon.java,v 1.5 2009/02/14 21:49:56 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -151,7 +151,9 @@ public class Daemon implements Runnable {
                     try { masterConnection.close(); } catch (SQLException e) { /* ignored */ }
                     try { slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
                     // Sleep until it's time for the first round
-                    delta = game.getStartTime().getTime() - System.currentTimeMillis();
+                    //delta = game.getStartTime().getTime() - System.currentTimeMillis();
+                    // TODO: for testing
+                    delta = 3000L;
                     state = State.FIRST_ROUND;
                     break;
                 case FIRST_ROUND:
@@ -168,7 +170,9 @@ public class Daemon implements Runnable {
                     // Send the tweet
                     // TODO
                     // Sleep until it's time for the next round
-                    delta = game.getTimeBetweenRounds();
+                    //delta = game.getTimeBetweenRounds();
+                    // TODO: for testing
+                    delta = 3000L;
                     state = State.SECOND_ROUND;
                     break;
                 case SECOND_ROUND:
