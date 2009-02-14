@@ -27,14 +27,14 @@ import java.util.Date;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Winners.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
+ * @version $Id: Winners.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
  */
 
 public class Winners {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.4 $";
+    public static final String CVS_REV = "$Revision: 1.5 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -71,9 +71,9 @@ public class Winners {
 
 // Instance variables /////////////////////////////////////////////////////////
 
-    private int wid;
-    private int pid;
-    private int qid;
+    private int movieWinnerId;
+    private int personId;
+    private int quoteId;
     private Date datestamp;
 
 // Constructor ////////////////////////////////////////////////////////////////
@@ -105,25 +105,25 @@ public class Winners {
     private static Winners setParams(ResultSet rs) throws SQLException {
         int i = 1;
         Winners winner = new Winners();
-        winner.setWid(rs.getInt(i));
-        winner.setPid(rs.getInt(++i));
-        winner.setQid(rs.getInt(++i));
+        winner.setMovieWinnerId(rs.getInt(i));
+        winner.setPersonId(rs.getInt(++i));
+        winner.setQuoteId(rs.getInt(++i));
         winner.setDatestamp(rs.getDate(++i));
         return winner;
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
 
-    public int getWid() {
-        return wid;
+    public int getMovieWinnerId() {
+        return movieWinnerId;
     }
 
-    public int getPid() {
-        return pid;
+    public int getPersonId() {
+        return personId;
     }
 
-    public int getQid() {
-        return qid;
+    public int getQuoteId() {
+        return quoteId;
     }
 
     public Date getDatestamp() {
@@ -132,16 +132,16 @@ public class Winners {
 
 // Mutators ///////////////////////////////////////////////////////////////////
 
-    public void setWid(int wid) {
-        this.wid = wid;
+    public void setMovieWinnerId(int movieWinnerId) {
+        this.movieWinnerId = movieWinnerId;
     }
 
-    public void setPid(int pid) {
-        this.pid = pid;
+    public void setPersonId(int personId) {
+        this.personId = personId;
     }
 
-    public void setQid(int qid) {
-        this.qid = qid;
+    public void setQuoteId(int quoteId) {
+        this.quoteId = quoteId;
     }
 
     public void setDatestamp(Date datestamp) {

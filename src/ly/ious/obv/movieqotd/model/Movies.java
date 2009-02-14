@@ -26,14 +26,14 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Movies.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
+ * @version $Id: Movies.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
  */
 
 public class Movies {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.4 $";
+    public static final String CVS_REV = "$Revision: 1.5 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -69,9 +69,9 @@ public class Movies {
 
 // Instance variables /////////////////////////////////////////////////////////
 
-    private int mid;
+    private int movieId;
     private String movieTitle;
-    private int gid;
+    private int genreId;
 
 // Constructor ////////////////////////////////////////////////////////////////
 
@@ -102,38 +102,38 @@ public class Movies {
     private static Movies setParams(ResultSet rs) throws SQLException {
         int i = 1;
         Movies movie = new Movies();
-        movie.setMid(rs.getInt(i));
+        movie.setMovieId(rs.getInt(i));
         movie.setMovieTitle(rs.getString(++i));
-        movie.setGid(rs.getInt(++i));
+        movie.setGenreId(rs.getInt(++i));
         return movie;
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
 
-    public int getMid() {
-        return mid;
+    public int getMovieId() {
+        return movieId;
     }
 
     public String getMovieTitle() {
         return movieTitle;
     }
 
-    public int getGid() {
-        return gid;
+    public int getGenreId() {
+        return genreId;
     }
 
 // Mutators ///////////////////////////////////////////////////////////////////
 
-    public void setMid(int mid) {
-        this.mid = mid;
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public void setMovieTitle(String movieTitle) {
         this.movieTitle = movieTitle;
     }
 
-    public void setGid(int gid) {
-        this.gid = gid;
+    public void setGenreId(int genreId) {
+        this.genreId = genreId;
     }
 
 } // class Movies

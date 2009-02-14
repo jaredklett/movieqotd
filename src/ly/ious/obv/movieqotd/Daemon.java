@@ -30,7 +30,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.5 2009/02/14 21:49:56 jklett Exp $
+ * @version $Id: Daemon.java,v 1.6 2009/02/14 22:05:56 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -115,8 +115,8 @@ public class Daemon implements Runnable {
                     Genres genre;
                     try {
                         quote = Quotes.getRandomQuote(slaveConnection);
-                        movie = Movies.getMovie(slaveConnection, quote.getMid());
-                        genre = Genres.getGenre(slaveConnection, movie.getGid());
+                        movie = Movies.getMovie(slaveConnection, quote.getMovieId());
+                        genre = Genres.getGenre(slaveConnection, movie.getGenreId());
                     } catch (Exception e) {
                         log.error("Caught exception while trying to fetch a random quote!", e);
                         break;
@@ -159,14 +159,7 @@ public class Daemon implements Runnable {
                 case FIRST_ROUND:
                     log.debug("State: FIRST ROUND");
                     // Get the first part of the quote
-                    String quoteText = currentQuote.getQuoteText();
-                    String[] words = quoteText.split(" ");
-                    int wordCountPerPart = words.length / 3;
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 0; i < wordCountPerPart; i++) {
-                        builder.append(words[i]);
-                    }
-                    log.debug("First part of the quote: " + builder.toString());
+                    log.debug("First part of the quote: " + currentQuote.getFirstPart());
                     // Send the tweet
                     // TODO
                     // Sleep until it's time for the next round
@@ -179,9 +172,11 @@ public class Daemon implements Runnable {
                     log.debug("State: SECOND ROUND");
                     // Did anyone get it?
                     // TODO
+                    log.debug("Second part of the quote: " + currentQuote.getSecondPart());
                     break;
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
+                    log.debug("Third part of the quote: " + currentQuote.getThirdPart());
                     break;
                 case GET_REPLIES:
                     log.debug("State: GET REPLIES");

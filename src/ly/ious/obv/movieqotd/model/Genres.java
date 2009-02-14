@@ -26,14 +26,14 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Genres.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
+ * @version $Id: Genres.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
  */
 
 public class Genres {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.4 $";
+    public static final String CVS_REV = "$Revision: 1.5 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -68,7 +68,7 @@ public class Genres {
 
 // Instance variables /////////////////////////////////////////////////////////
 
-    private int gid;
+    private int genreId;
     private String genreName;
 
 // Constructor ////////////////////////////////////////////////////////////////
@@ -100,15 +100,15 @@ public class Genres {
     private static Genres setParams(ResultSet rs) throws SQLException {
         int i = 1;
         Genres genre = new Genres();
-        genre.setGid(rs.getInt(i));
+        genre.setGenreId(rs.getInt(i));
         genre.setGenreName(rs.getString(++i));
         return genre;
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
 
-    public int getGid() {
-        return gid;
+    public int getGenreId() {
+        return genreId;
     }
 
     public String getGenreName() {
@@ -117,8 +117,8 @@ public class Genres {
 
 // Mutators ///////////////////////////////////////////////////////////////////
 
-    public void setGid(int gid) {
-        this.gid = gid;
+    public void setGenreId(int genreId) {
+        this.genreId = genreId;
     }
 
     public void setGenreName(String genreName) {

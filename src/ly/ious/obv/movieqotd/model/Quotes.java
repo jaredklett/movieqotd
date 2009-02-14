@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.8 2009/02/14 21:47:01 jklett Exp $
+ * @version $Id: Quotes.java,v 1.9 2009/02/14 22:05:56 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.8 $";
+    public static final String CVS_REV = "$Revision: 1.9 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -96,11 +96,15 @@ public class Quotes {
 
 // Instance variables /////////////////////////////////////////////////////////
 
-    private int qid;
-    private int mid;
+    private int quoteId;
+    private int movieId;
     private String quoteText;
     private boolean used;
     private Date usedDatestamp;
+
+    private String firstPart;
+    private String secondPart;
+    private String thirdPart;
 
 // Constructor ////////////////////////////////////////////////////////////////
 
@@ -121,7 +125,29 @@ public class Quotes {
             list.add(quote);
         }
         rs.close();
-        return list.get(new Random().nextInt(list.size()));
+        Quotes randomQuote = list.get(new Random().nextInt(list.size()));
+        String quoteText = randomQuote.getQuoteText();
+        String[] words = quoteText.split(" ");
+        int wordCountPerPart = words.length / 3;
+        int[] counts = new int[3];
+        counts[0] = wordCountPerPart;
+        counts[1] = wordCountPerPart;
+        counts[2] = words.length - (counts[0] + counts[1]);
+        String[] parts = new String[3];
+        StringBuilder builder = new StringBuilder();
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < counts[x]; y++) {
+                builder.append(words[y]);
+                if (y + 1 != wordCountPerPart)
+                    builder.append(" ");
+            }
+            parts[x] = builder.toString();
+            builder.setLength(0);
+        }
+        randomQuote.setFirstPart(parts[0]);
+        randomQuote.setSecondPart(parts[1]);
+        randomQuote.setThirdPart(parts[2]);
+        return randomQuote;
     }
 
     public static Quotes getQuote(Connection connection, int qid) throws SQLException {
@@ -145,31 +171,33 @@ public class Quotes {
     private static Quotes setParams(ResultSet rs) throws SQLException {
         int i = 1;
         Quotes quote = new Quotes();
-        quote.setQid(rs.getInt(i));
-        quote.setMid(rs.getInt(++i));
+        quote.setQuoteId(rs.getInt(i));
+        quote.setMovieId(rs.getInt(++i));
         quote.setQuoteText(rs.getString(++i));
         quote.setUsed(rs.getInt(++i) == 1);
         quote.setUsedDatestamp(rs.getDate(++i));
         return quote;
     }
 
+// Instance methods ///////////////////////////////////////////////////////////
+
     public boolean updateUsed(Connection connection) throws SQLException {
-        Object[] values = { used, usedDatestamp, qid };
+        Object[] values = { used, usedDatestamp, quoteId };
         int rowsUpdated = SQLExec.doUpdate(connection, SQL_UPDATE_USED, values);
         boolean updated = rowsUpdated > 0;
         if (!updated)
-            log.warn("Updating quote failed; ID: " + qid + "; " + rowsUpdated + " rows returned!");
+            log.warn("Updating quote failed; ID: " + quoteId + "; " + rowsUpdated + " rows returned!");
         return updated;
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
 
-    public int getQid() {
-        return qid;
+    public int getQuoteId() {
+        return quoteId;
     }
 
-    public int getMid() {
-        return mid;
+    public int getMovieId() {
+        return movieId;
     }
 
     public String getQuoteText() {
@@ -184,14 +212,26 @@ public class Quotes {
         return usedDatestamp;
     }
 
-// Mutators ///////////////////////////////////////////////////////////////////
-
-    public void setQid(int qid) {
-        this.qid = qid;
+    public String getFirstPart() {
+        return firstPart;
     }
 
-    public void setMid(int mid) {
-        this.mid = mid;
+    public String getSecondPart() {
+        return secondPart;
+    }
+
+    public String getThirdPart() {
+        return thirdPart;
+    }
+
+// Mutators ///////////////////////////////////////////////////////////////////
+
+    public void setQuoteId(int quoteId) {
+        this.quoteId = quoteId;
+    }
+
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public void setQuoteText(String quoteText) {
@@ -204,6 +244,18 @@ public class Quotes {
 
     public void setUsedDatestamp(Date usedDatestamp) {
         this.usedDatestamp = usedDatestamp;
+    }
+
+    public void setFirstPart(String firstPart) {
+        this.firstPart = firstPart;
+    }
+
+    public void setSecondPart(String secondPart) {
+        this.secondPart = secondPart;
+    }
+
+    public void setThirdPart(String thirdPart) {
+        this.thirdPart = thirdPart;
     }
 
 } // class Quotes
