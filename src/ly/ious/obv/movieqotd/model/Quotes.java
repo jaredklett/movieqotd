@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.6 2009/02/14 19:30:07 jklett Exp $
+ * @version $Id: Quotes.java,v 1.7 2009/02/14 21:45:40 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.6 $";
+    public static final String CVS_REV = "$Revision: 1.7 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -62,6 +62,10 @@ public class Quotes {
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
 
+    private static final Object[] WHERE_SELECT = {
+            USED, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
+    };
+
     private static final Object[] WHERE_GET_QUOTE_BY_QID = {
             QID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
     };
@@ -74,7 +78,7 @@ public class Quotes {
     private static final String SQL_SELECT = SQLBuilder.buildSelect(
             new Table[] {TABLE},
             ALL_COLUMNS,
-            null
+            WHERE_SELECT
     );
 
     private static final String SQL_GET_QUOTE_BY_QID = SQLBuilder.buildSelect(
