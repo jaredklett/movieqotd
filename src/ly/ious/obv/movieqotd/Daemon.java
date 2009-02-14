@@ -30,7 +30,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.3 2009/02/14 19:29:50 jklett Exp $
+ * @version $Id: Daemon.java,v 1.4 2009/02/14 20:28:11 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -71,7 +71,7 @@ public class Daemon implements Runnable {
     };
 
     public Daemon() {
-        this("movieqotd");
+        this("obviously");
     }
 
     public Daemon(String site) {
@@ -91,7 +91,9 @@ public class Daemon implements Runnable {
                     // Create a new game
                     game = new Game();
                     // Sleep until it's announce time
-                    delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
+                    //delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
+                    // TODO: for testing
+                    delta = 1000L;
                     state = State.ANNOUNCE_GAME;
                     break;
                 case ANNOUNCE_GAME:
@@ -107,6 +109,7 @@ public class Daemon implements Runnable {
                         log.warn("Can't continue, bailing out...");
                         break;
                     }
+                    log.debug("Opened database connections...");
                     Quotes quote;
                     Movies movie;
                     Genres genre;
@@ -120,7 +123,8 @@ public class Daemon implements Runnable {
                     }
                     // Form the tweet
                     // TODO: externalize
-                    String announceTemplate = TemplateLoader.loadTemplate("announce.tmpl");
+                    String announceTemplate = TemplateLoader.loadTemplate("trivia_announce.tmpl");
+                    log.debug("Loaded template: " + announceTemplate);
                     Map<String,String> map = new HashMap<String,String>();
                     map.put("$GENRENAME$", genre.getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
