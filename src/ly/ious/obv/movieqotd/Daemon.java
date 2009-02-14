@@ -30,7 +30,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.6 2009/02/14 22:05:56 jklett Exp $
+ * @version $Id: Daemon.java,v 1.7 2009/02/14 22:24:24 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -173,6 +173,8 @@ public class Daemon implements Runnable {
                     // Did anyone get it?
                     // TODO
                     log.debug("Second part of the quote: " + currentQuote.getSecondPart());
+                    // TODO: for testing
+                    state = State.THIRD_ROUND;
                     break;
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
