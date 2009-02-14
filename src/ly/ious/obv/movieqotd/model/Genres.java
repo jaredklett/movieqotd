@@ -26,19 +26,19 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Genres.java,v 1.3 2009/02/04 03:25:42 jklett Exp $
+ * @version $Id: Genres.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
  */
 
 public class Genres {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.3 $";
+    public static final String CVS_REV = "$Revision: 1.4 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
-    public static final Table TABLE = new Table("genres", "g");
-    public static final Column GID = new Column("gid", TABLE);
+    public static final Table TABLE = new Table("movie_genres", "mg");
+    public static final Column GID = new Column("genre_id", TABLE);
     public static final Column GENRE_NAME = new Column("genre_name", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////

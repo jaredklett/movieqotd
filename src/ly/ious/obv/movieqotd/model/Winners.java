@@ -27,21 +27,21 @@ import java.util.Date;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Winners.java,v 1.3 2009/02/04 03:25:42 jklett Exp $
+ * @version $Id: Winners.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
  */
 
 public class Winners {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.3 $";
+    public static final String CVS_REV = "$Revision: 1.4 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
-    public static final Table TABLE = new Table("winners", "w");
-    public static final Column WID = new Column("wid", TABLE);
-    public static final Column PID = new Column("pid", TABLE);
-    public static final Column QID = new Column("qid", TABLE);
+    public static final Table TABLE = new Table("movie_winners", "mw");
+    public static final Column WID = new Column("movie_win_id", TABLE);
+    public static final Column PID = new Column("person_id", TABLE);
+    public static final Column QID = new Column("quote_id", TABLE);
     public static final Column DATESTAMP = new Column("datestamp", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////

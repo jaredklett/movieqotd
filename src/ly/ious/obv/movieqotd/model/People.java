@@ -26,19 +26,19 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: People.java,v 1.3 2009/02/04 03:25:42 jklett Exp $
+ * @version $Id: People.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
  */
 
 public class People {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.3 $";
+    public static final String CVS_REV = "$Revision: 1.4 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
     public static final Table TABLE = new Table("people", "p");
-    public static final Column PID = new Column("qid", TABLE);
+    public static final Column PID = new Column("person_id", TABLE);
     public static final Column TWITTER_NAME = new Column("twitter_name", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////

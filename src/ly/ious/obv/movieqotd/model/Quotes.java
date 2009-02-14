@@ -21,26 +21,29 @@ import org.javaforge.sql.Table;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 /**
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.4 2009/02/04 03:25:42 jklett Exp $
+ * @version $Id: Quotes.java,v 1.5 2009/02/14 18:00:35 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.4 $";
+    public static final String CVS_REV = "$Revision: 1.5 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
-    public static final Table TABLE = new Table("quotes", "q");
-    public static final Column QID = new Column("qid", TABLE);
-    public static final Column MID = new Column("mid", TABLE);
+    public static final Table TABLE = new Table("movie_quotes", "mq");
+    public static final Column QID = new Column("quote_id", TABLE);
+    public static final Column MID = new Column("movie_id", TABLE);
     public static final Column QUOTE_TEXT = new Column("quote_text", TABLE);
     public static final Column USED = new Column("used", TABLE);
     public static final Column USED_DATESTAMP = new Column("used_timestamp", TABLE);
@@ -85,6 +88,20 @@ public class Quotes {
     }
 
 // Class methods //////////////////////////////////////////////////////////////
+
+    public static Quotes getRandomQuote(Connection connection) throws SQLException {
+        List<Quotes> list = new ArrayList<Quotes>();
+        Object[] values = {
+                0 // not used
+        };
+        ResultSet rs = SQLExec.doQuery(connection, SQL_SELECT, values);
+        while (rs.next()) {
+            Quotes quote = setParams(rs);
+            list.add(quote);
+        }
+        rs.close();
+        return list.get(new Random().nextInt(list.size()));
+    }
 
     public static Quotes getQuote(Connection connection, int qid) throws SQLException {
         Quotes quote = null;

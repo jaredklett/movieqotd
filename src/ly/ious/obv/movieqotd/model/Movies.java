@@ -26,21 +26,21 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Movies.java,v 1.3 2009/02/04 03:25:42 jklett Exp $
+ * @version $Id: Movies.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
  */
 
 public class Movies {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.3 $";
+    public static final String CVS_REV = "$Revision: 1.4 $";
 
 // Table structure ////////////////////////////////////////////////////////////
 
     public static final Table TABLE = new Table("movies", "m");
-    public static final Column MID = new Column("mid", TABLE);
+    public static final Column MID = new Column("movie_id", TABLE);
     public static final Column MOVIE_TITLE = new Column("movie_title", TABLE);
-    public static final Column GID = new Column("gid", TABLE);
+    public static final Column GID = new Column("genre_id", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////
 
