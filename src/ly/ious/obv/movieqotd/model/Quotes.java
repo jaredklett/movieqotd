@@ -15,6 +15,7 @@ package ly.ious.obv.movieqotd.model;
 import com.blipnetworks.sql.SQLBuilder;
 import com.blipnetworks.sql.SQLConstants;
 import com.blipnetworks.sql.SQLExec;
+import org.apache.log4j.Logger;
 import org.javaforge.sql.Column;
 import org.javaforge.sql.Table;
 
@@ -30,14 +31,19 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.5 2009/02/14 18:00:35 jklett Exp $
+ * @version $Id: Quotes.java,v 1.6 2009/02/14 19:30:07 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.5 $";
+    public static final String CVS_REV = "$Revision: 1.6 $";
+
+// Static variables ///////////////////////////////////////////////////////////
+
+    /** Our logging facility. */
+    private static Logger log = Logger.getLogger(Quotes.class);
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -60,6 +66,10 @@ public class Quotes {
             QID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
     };
 
+    private static final Object[] WHERE_UPDATE_USED = {
+            QID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
+    };
+
     /** Generated SQL which loads all the rows in the table. */
     private static final String SQL_SELECT = SQLBuilder.buildSelect(
             new Table[] {TABLE},
@@ -71,6 +81,13 @@ public class Quotes {
             new Table[] {TABLE},
             ALL_COLUMNS,
             WHERE_GET_QUOTE_BY_QID
+    );
+
+    private static final String SQL_UPDATE_USED = SQLBuilder.buildUpdate(
+            new Table[] {TABLE},
+            new Column[] { USED, USED_DATESTAMP },
+            null,
+            WHERE_UPDATE_USED
     );
 
 // Instance variables /////////////////////////////////////////////////////////
@@ -130,6 +147,15 @@ public class Quotes {
         quote.setUsed(rs.getInt(++i) == 1);
         quote.setUsedDatestamp(rs.getDate(++i));
         return quote;
+    }
+
+    public boolean updateUsed(Connection connection) throws SQLException {
+        Object[] values = { used, usedDatestamp, qid };
+        int rowsUpdated = SQLExec.doUpdate(connection, SQL_UPDATE_USED, values);
+        boolean updated = rowsUpdated > 0;
+        if (!updated)
+            log.warn("Updating quote failed; ID: " + qid + "; " + rowsUpdated + " rows returned!");
+        return updated;
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
