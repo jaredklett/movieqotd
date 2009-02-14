@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.9 2009/02/14 22:05:56 jklett Exp $
+ * @version $Id: Quotes.java,v 1.10 2009/02/14 22:20:16 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.9 $";
+    public static final String CVS_REV = "$Revision: 1.10 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -127,26 +127,31 @@ public class Quotes {
         rs.close();
         Quotes randomQuote = list.get(new Random().nextInt(list.size()));
         String quoteText = randomQuote.getQuoteText();
-        String[] words = quoteText.split(" ");
-        int wordCountPerPart = words.length / 3;
-        int[] counts = new int[3];
-        counts[0] = wordCountPerPart;
-        counts[1] = wordCountPerPart;
-        counts[2] = words.length - (counts[0] + counts[1]);
-        String[] parts = new String[3];
-        StringBuilder builder = new StringBuilder();
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < counts[x]; y++) {
-                builder.append(words[y]);
-                if (y + 1 != wordCountPerPart)
-                    builder.append(" ");
-            }
-            parts[x] = builder.toString();
-            builder.setLength(0);
-        }
-        randomQuote.setFirstPart(parts[0]);
-        randomQuote.setSecondPart(parts[1]);
-        randomQuote.setThirdPart(parts[2]);
+        int len = quoteText.length();
+        int wordsPerPart = len / 3;
+        randomQuote.setFirstPart(quoteText.substring(0, wordsPerPart));
+        randomQuote.setSecondPart(quoteText.substring(wordsPerPart, wordsPerPart * 2));
+        randomQuote.setThirdPart(quoteText.substring(wordsPerPart * 2, len));
+//        String[] words = quoteText.split(" ");
+//        int wordCountPerPart = words.length / 3;
+//        int[] counts = new int[3];
+//        counts[0] = wordCountPerPart;
+//        counts[1] = wordCountPerPart;
+//        counts[2] = words.length - (counts[0] + counts[1]);
+//        String[] parts = new String[3];
+//        StringBuilder builder = new StringBuilder();
+//        for (int x = 0; x < 3; x++) {
+//            for (int y = 0; y < counts[x]; y++) {
+//                builder.append(words[y]);
+//                if (y + 1 != wordCountPerPart)
+//                    builder.append(" ");
+//            }
+//            parts[x] = builder.toString();
+//            builder.setLength(0);
+//        }
+//        randomQuote.setFirstPart(parts[0]);
+//        randomQuote.setSecondPart(parts[1]);
+//        randomQuote.setThirdPart(parts[2]);
         return randomQuote;
     }
 
