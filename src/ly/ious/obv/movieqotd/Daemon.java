@@ -21,6 +21,7 @@ import org.javaforge.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +30,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.2 2009/02/14 19:09:55 jklett Exp $
+ * @version $Id: Daemon.java,v 1.3 2009/02/14 19:29:50 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -51,6 +52,9 @@ public class Daemon implements Runnable {
 
 // Instance variables /////////////////////////////////////////////////////////
 
+    private Quotes currentQuote;
+    private Movies currentMovie;
+    private Genres currentGenre;
     /** TODO */
     private String site;
     /** TODO */
@@ -123,6 +127,22 @@ public class Daemon implements Runnable {
                     // Send the tweet
                     // TODO
                     log.debug("Announce tweet: " + tweet);
+                    // Set the quote in memory
+                    currentQuote = quote;
+                    currentMovie = movie;
+                    currentGenre = genre;
+                    // Mark that it's been used
+                    quote.setUsed(true);
+                    quote.setUsedDatestamp(new Date());
+                    try {
+                        boolean success = quote.updateUsed(masterConnection);
+                        if (!success) {
+                            // TODO: what to do? rollback!
+                            log.warn("What the heck do I do now?");
+                        }
+                    } catch (SQLException e) {
+                        log.error("Caught exception while trying to set a quote as used!", e);
+                    }
                     // Clean up database connections
                     try { masterConnection.close(); } catch (SQLException e) { /* ignored */ }
                     try { slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
@@ -133,7 +153,14 @@ public class Daemon implements Runnable {
                 case FIRST_ROUND:
                     log.debug("State: FIRST ROUND");
                     // Get the first part of the quote
-                    // TODO
+                    String quoteText = currentQuote.getQuoteText();
+                    String[] words = quoteText.split(" ");
+                    int wordCountPerPart = words.length / 3;
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 0; i < wordCountPerPart; i++) {
+                        builder.append(words[i]);
+                    }
+                    log.debug("First part of the quote: " + builder.toString());
                     // Send the tweet
                     // TODO
                     // Sleep until it's time for the next round
