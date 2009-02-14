@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.7 2009/02/14 21:45:40 jklett Exp $
+ * @version $Id: Quotes.java,v 1.8 2009/02/14 21:47:01 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.7 $";
+    public static final String CVS_REV = "$Revision: 1.8 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -52,7 +52,7 @@ public class Quotes {
     public static final Column MID = new Column("movie_id", TABLE);
     public static final Column QUOTE_TEXT = new Column("quote_text", TABLE);
     public static final Column USED = new Column("used", TABLE);
-    public static final Column USED_DATESTAMP = new Column("used_timestamp", TABLE);
+    public static final Column USED_DATESTAMP = new Column("used_datestamp", TABLE);
 
 // Table column groupings /////////////////////////////////////////////////////
 
