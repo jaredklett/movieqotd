@@ -18,19 +18,19 @@ import ly.ious.obv.movieqotd.model.Movies;
 import ly.ious.obv.movieqotd.model.Quotes;
 import org.apache.log4j.Logger;
 import org.javaforge.util.StringUtils;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.7 2009/02/14 22:24:24 jklett Exp $
+ * @version $Id: Daemon.java,v 1.8 2009/02/28 21:17:13 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -50,8 +50,21 @@ public class Daemon implements Runnable {
         ANNOUNCE_WINNER
     }
 
+    private static Comparator<Status> ascendingDateStatusComparator = new Comparator<Status>() {
+        public int compare(Status s1, Status s2) {
+            if (s1.getCreatedAt().before(s2.getCreatedAt()))
+                return -1;
+            if (s1.getCreatedAt().after(s2.getCreatedAt()))
+                return 1;
+            return 0;
+        }
+    };
+
 // Instance variables /////////////////////////////////////////////////////////
 
+    private String username = "movieqotd";
+    private String password = "dmitri1";
+    private List<Status> winnerList;
     private Quotes currentQuote;
     private Movies currentMovie;
     private Genres currentGenre;
@@ -84,6 +97,7 @@ public class Daemon implements Runnable {
     public void run() {
         long delta = 5000L;
         Game game = new Game();
+        winnerList = new ArrayList<Status>();
         while (running) {
             switch (state) {
                 case NO_GAME:
@@ -179,12 +193,68 @@ public class Daemon implements Runnable {
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
                     log.debug("Third part of the quote: " + currentQuote.getThirdPart());
+                    state = State.GET_REPLIES;
                     break;
                 case GET_REPLIES:
                     log.debug("State: GET REPLIES");
+                    Twitter twitter = new Twitter(username, password);
+                    for (int i = 1; i < Integer.MAX_VALUE; i++) {
+                        List<Status> replies = null;
+                        try {
+                            replies = twitter.getRepliesByPage(i);
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while retrieving replies!", e);
+                        }
+                        if (replies.size() == 0) {
+                            break;
+                        }
+                        for (Status reply : replies) {
+                            // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
+                            String text = reply.getText();
+                            if (text.equalsIgnoreCase(movie.getMovieTitle())) {
+                                // possible WIN
+                                winnerList.add(reply);
+                            }
+                        }
+                    }
+                    if (winnerList.size() == 0) {
+                        // no winners yet, go to the next round
+                        if (state == State.FIRST_ROUND) {
+                            state = State.SECOND_ROUND;
+                        } else if (state == State.SECOND_ROUND) {
+                            state = State.THIRD_ROUND;
+                        } else {
+                            state = State.ANNOUNCE_WINNER;
+                        }
+                    } else {
+                        // we have one or more winners
+                        state = State.ANNOUNCE_WINNER;
+                    }
                     break;
                 case ANNOUNCE_WINNER:
                     log.debug("State: ANNOUNCE WINNER");
+                    boolean noWinner = winnerList.size() == 0;
+                    if (!noWinner) {
+                        Collections.sort(winnerList, ascendingDateStatusComparator);
+                    }
+                    // Form the tweet
+                    String winnerTemplate;
+                    if (noWinner) {
+                        // TODO: externalize
+                        winnerTemplate = TemplateLoader.loadTemplate("no_winner.tmpl");
+                    } else {
+                        // TODO: externalize
+                        winnerTemplate = TemplateLoader.loadTemplate("winner_announce.tmpl");
+                    }
+                    log.debug("Loaded template: " + winnerTemplate);
+                    Map<String,String> awMap = new HashMap<String,String>();
+                    awMap.put("$MOVIETITLE$", genre.getGenreName());
+                    if (!noWinner)
+                        awMap.put("$SCREENNAME$", winnerList.get(0).getUser().getScreenName());
+                    String awTweet = StringUtils.mapReplace(StringUtils.mapSplit(winnerTemplate, awMap), awMap, "$");
+                    // Send the tweet
+                    // TODO
+                    log.debug("Announce winner tweet: " + awTweet);
                     break;
                 default:
                     log.debug("State: UNKNOWN");
