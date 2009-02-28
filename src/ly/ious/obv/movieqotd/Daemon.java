@@ -12,25 +12,23 @@
 
 package ly.ious.obv.movieqotd;
 
-import com.blipnetworks.sql.DataSourceManager;
-import ly.ious.obv.movieqotd.model.Genres;
-import ly.ious.obv.movieqotd.model.Movies;
-import ly.ious.obv.movieqotd.model.Quotes;
 import org.apache.log4j.Logger;
 import org.javaforge.util.StringUtils;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.8 2009/02/28 21:17:13 jklett Exp $
+ * @version $Id: Daemon.java,v 1.9 2009/02/28 22:37:55 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -50,26 +48,10 @@ public class Daemon implements Runnable {
         ANNOUNCE_WINNER
     }
 
-    private static Comparator<Status> ascendingDateStatusComparator = new Comparator<Status>() {
-        public int compare(Status s1, Status s2) {
-            if (s1.getCreatedAt().before(s2.getCreatedAt()))
-                return -1;
-            if (s1.getCreatedAt().after(s2.getCreatedAt()))
-                return 1;
-            return 0;
-        }
-    };
-
 // Instance variables /////////////////////////////////////////////////////////
 
     private String username = "movieqotd";
     private String password = "dmitri1";
-    private List<Status> winnerList;
-    private Quotes currentQuote;
-    private Movies currentMovie;
-    private Genres currentGenre;
-    /** TODO */
-    private String site;
     /** TODO */
     private boolean running;
     /** TODO */
@@ -84,11 +66,6 @@ public class Daemon implements Runnable {
     };
 
     public Daemon() {
-        this("obviously");
-    }
-
-    public Daemon(String site) {
-        this.site = site;
         state = State.NO_GAME;
         // Register our shutdown hook
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -96,14 +73,17 @@ public class Daemon implements Runnable {
 
     public void run() {
         long delta = 5000L;
-        Game game = new Game();
-        winnerList = new ArrayList<Status>();
+        Game game = null;
         while (running) {
             switch (state) {
                 case NO_GAME:
                     log.debug("State: NO GAME");
                     // Create a new game
-                    game = new Game();
+                    try {
+                        game = new Game();
+                    } catch (SQLException e) {
+                        log.error("Caught exception while trying to create game!", e);
+                    }
                     // Sleep until it's announce time
                     //delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
                     // TODO: for testing
@@ -112,58 +92,16 @@ public class Daemon implements Runnable {
                     break;
                 case ANNOUNCE_GAME:
                     log.debug("State: ANNOUNCE GAME");
-                    // Pick a quote
-                    Connection masterConnection;
-                    Connection slaveConnection;
-                    try {
-                        masterConnection = DataSourceManager.getMasterConnection(site);
-                        slaveConnection = DataSourceManager.getSlaveConnection(site);
-                    } catch (SQLException e) {
-                        log.error("Caught exception while trying to get a database connection!", e);
-                        log.warn("Can't continue, bailing out...");
-                        break;
-                    }
-                    log.debug("Opened database connections...");
-                    Quotes quote;
-                    Movies movie;
-                    Genres genre;
-                    try {
-                        quote = Quotes.getRandomQuote(slaveConnection);
-                        movie = Movies.getMovie(slaveConnection, quote.getMovieId());
-                        genre = Genres.getGenre(slaveConnection, movie.getGenreId());
-                    } catch (Exception e) {
-                        log.error("Caught exception while trying to fetch a random quote!", e);
-                        break;
-                    }
                     // Form the tweet
                     // TODO: externalize
                     String announceTemplate = TemplateLoader.loadTemplate("trivia_announce.tmpl");
                     log.debug("Loaded template: " + announceTemplate);
                     Map<String,String> map = new HashMap<String,String>();
-                    map.put("$GENRENAME$", genre.getGenreName());
+                    map.put("$GENRENAME$", game.getGenre().getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
                     // Send the tweet
                     // TODO
                     log.debug("Announce tweet: " + tweet);
-                    // Set the quote in memory
-                    currentQuote = quote;
-                    currentMovie = movie;
-                    currentGenre = genre;
-                    // Mark that it's been used
-                    quote.setUsed(true);
-                    quote.setUsedDatestamp(new Date());
-                    try {
-                        boolean success = quote.updateUsed(masterConnection);
-                        if (!success) {
-                            // TODO: what to do? rollback!
-                            log.warn("What the heck do I do now?");
-                        }
-                    } catch (SQLException e) {
-                        log.error("Caught exception while trying to set a quote as used!", e);
-                    }
-                    // Clean up database connections
-                    try { masterConnection.close(); } catch (SQLException e) { /* ignored */ }
-                    try { slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
                     // Sleep until it's time for the first round
                     //delta = game.getStartTime().getTime() - System.currentTimeMillis();
                     // TODO: for testing
@@ -173,7 +111,7 @@ public class Daemon implements Runnable {
                 case FIRST_ROUND:
                     log.debug("State: FIRST ROUND");
                     // Get the first part of the quote
-                    log.debug("First part of the quote: " + currentQuote.getFirstPart());
+                    log.debug("First part of the quote: " + game.getQuote().getFirstPart());
                     // Send the tweet
                     // TODO
                     // Sleep until it's time for the next round
@@ -186,13 +124,13 @@ public class Daemon implements Runnable {
                     log.debug("State: SECOND ROUND");
                     // Did anyone get it?
                     // TODO
-                    log.debug("Second part of the quote: " + currentQuote.getSecondPart());
+                    log.debug("Second part of the quote: " + game.getQuote().getSecondPart());
                     // TODO: for testing
                     state = State.THIRD_ROUND;
                     break;
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
-                    log.debug("Third part of the quote: " + currentQuote.getThirdPart());
+                    log.debug("Third part of the quote: " + game.getQuote().getThirdPart());
                     state = State.GET_REPLIES;
                     break;
                 case GET_REPLIES:
@@ -211,13 +149,13 @@ public class Daemon implements Runnable {
                         for (Status reply : replies) {
                             // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
                             String text = reply.getText();
-                            if (text.equalsIgnoreCase(movie.getMovieTitle())) {
+                            if (text.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
                                 // possible WIN
-                                winnerList.add(reply);
+                                game.addToWinnerList(reply);
                             }
                         }
                     }
-                    if (winnerList.size() == 0) {
+                    if (game.getWinnerList().size() == 0) {
                         // no winners yet, go to the next round
                         if (state == State.FIRST_ROUND) {
                             state = State.SECOND_ROUND;
@@ -233,9 +171,9 @@ public class Daemon implements Runnable {
                     break;
                 case ANNOUNCE_WINNER:
                     log.debug("State: ANNOUNCE WINNER");
-                    boolean noWinner = winnerList.size() == 0;
+                    boolean noWinner = game.getWinnerList().size() == 0;
                     if (!noWinner) {
-                        Collections.sort(winnerList, ascendingDateStatusComparator);
+                        game.sortWinnerList();
                     }
                     // Form the tweet
                     String winnerTemplate;
@@ -248,9 +186,9 @@ public class Daemon implements Runnable {
                     }
                     log.debug("Loaded template: " + winnerTemplate);
                     Map<String,String> awMap = new HashMap<String,String>();
-                    awMap.put("$MOVIETITLE$", genre.getGenreName());
+                    awMap.put("$MOVIETITLE$", game.getMovie().getMovieTitle());
                     if (!noWinner)
-                        awMap.put("$SCREENNAME$", winnerList.get(0).getUser().getScreenName());
+                        awMap.put("$SCREENNAME$", game.getWinnerList().get(0).getUser().getScreenName());
                     String awTweet = StringUtils.mapReplace(StringUtils.mapSplit(winnerTemplate, awMap), awMap, "$");
                     // Send the tweet
                     // TODO

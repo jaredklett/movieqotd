@@ -12,19 +12,25 @@
 
 package ly.ious.obv.movieqotd;
 
+import com.blipnetworks.sql.DataSourceManager;
+import ly.ious.obv.movieqotd.model.Genres;
+import ly.ious.obv.movieqotd.model.Movies;
+import ly.ious.obv.movieqotd.model.Quotes;
 import org.apache.log4j.Logger;
 import org.javaforge.util.Config;
+import twitter4j.Status;
 
-import java.util.Date;
-import java.util.Calendar;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.1 2009/01/26 04:19:57 jklett Exp $
+ * @version $Id: Game.java,v 1.2 2009/02/28 22:37:55 jklett Exp $
  */
 
 public class Game {
@@ -34,12 +40,23 @@ public class Game {
     /** Our logging facility. */
     private static Logger log = Logger.getLogger(Game.class);
 
+    private static Comparator<Status> ascendingDateStatusComparator = new Comparator<Status>() {
+        public int compare(Status s1, Status s2) {
+            if (s1.getCreatedAt().before(s2.getCreatedAt()))
+                return -1;
+            if (s1.getCreatedAt().after(s2.getCreatedAt()))
+                return 1;
+            return 0;
+        }
+    };
+
 // Configuration //////////////////////////////////////////////////////////////
 
     public static final String CONFIG_NAME = "game";
     public static final String PROPERTY_ANNOUNCE_TIME = "announce.time";
     public static final String PROPERTY_START_TIME = "start.time";
     public static final String PROPERTY_TIME_BETWEEN_ROUNDS = "time.between.rounds";
+    public static final String PROPERTY_SITE = "site";
 
     /** TODO */
     private static String announceTime;
@@ -47,10 +64,20 @@ public class Game {
     private static String startTime;
     /** TODO */
     private static long timeBetweenRounds;
+    /** TODO */
+    private static String site;
 
     public static final String DEFAULT_ANNOUNCE_TIME = "12:00 EST";
     public static final String DEFAULT_START_TIME = "13:00 EST";
     public static final long DEFAULT_TIME_BETWEEN_ROUNDS = 60 * 60 * 1000L;
+    public static final String DEFAULT_SITE = "obviously";
+
+// Instance initializer ///////////////////////////////////////////////////////
+
+    private List<Status> winnerList;
+    private Quotes quote;
+    private Movies movie;
+    private Genres genre;
 
 // Class initializer //////////////////////////////////////////////////////////
 
@@ -67,18 +94,50 @@ public class Game {
             announceTime = config.stringProperty(PROPERTY_ANNOUNCE_TIME, DEFAULT_ANNOUNCE_TIME);
             startTime = config.stringProperty(PROPERTY_START_TIME, DEFAULT_START_TIME);
             timeBetweenRounds = config.longProperty(PROPERTY_TIME_BETWEEN_ROUNDS, DEFAULT_TIME_BETWEEN_ROUNDS);
+            site = config.stringProperty(PROPERTY_SITE, DEFAULT_SITE);
         }
 
         log.info("Loading configuration from file: " + CONFIG_NAME);
         log.info(PROPERTY_ANNOUNCE_TIME + " = " + announceTime);
         log.info(PROPERTY_START_TIME + " = " + startTime);
         log.info(PROPERTY_TIME_BETWEEN_ROUNDS + " = " + timeBetweenRounds);
+        log.info(PROPERTY_SITE + " = " + site);
     }
 
 // Constructor ////////////////////////////////////////////////////////////////
 
-    public Game() {
+    public Game() throws SQLException {
+        winnerList = new ArrayList<Status>();
+        // Pick a quote
+        Connection masterConnection;
+        Connection slaveConnection;
+        masterConnection = DataSourceManager.getMasterConnection(site);
+        slaveConnection = DataSourceManager.getSlaveConnection(site);
+        log.debug("Opened database connections...");
+            quote = Quotes.getRandomQuote(slaveConnection);
+            movie = Movies.getMovie(slaveConnection, quote.getMovieId());
+            genre = Genres.getGenre(slaveConnection, movie.getGenreId());
+        // Mark that it's been used
+        quote.setUsed(true);
+        quote.setUsedDatestamp(new Date());
+        boolean success = quote.updateUsed(masterConnection);
+        if (!success) {
+            // TODO: what to do? rollback!
+            log.warn("What the heck do I do now?");
+        }
+        // Clean up database connections
+        try { masterConnection.close(); } catch (SQLException e) { /* ignored */ }
+        try { slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
+    }
 
+// Instance methods ///////////////////////////////////////////////////////////
+
+    public void sortWinnerList() {
+        Collections.sort(winnerList, ascendingDateStatusComparator);
+    }
+
+    public void addToWinnerList(Status status) {
+        winnerList.add(status);
     }
 
 // Accessors //////////////////////////////////////////////////////////////////
@@ -112,11 +171,32 @@ public class Game {
         return now.getTime();
     }
 
+    public Quotes getQuote() {
+        return quote;
+    }
+
+    public Movies getMovie() {
+        return movie;
+    }
+
+    public Genres getGenre() {
+        return genre;
+    }
+
+    public List<Status> getWinnerList() {
+        return winnerList;
+    }
+
+// Main method ////////////////////////////////////////////////////////////////
 
     public static void main(String[] args) {
-        Game game = new Game();
-        System.out.println(game.getAnnounceTime());
-        System.out.println(game.getStartTime());
+        try {
+            Game game = new Game();
+            System.out.println(game.getAnnounceTime());
+            System.out.println(game.getStartTime());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 } // class Game
