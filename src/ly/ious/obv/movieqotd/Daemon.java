@@ -28,7 +28,7 @@ import java.util.UUID;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.9 2009/02/28 22:37:55 jklett Exp $
+ * @version $Id: Daemon.java,v 1.10 2009/02/28 23:02:16 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -53,6 +53,8 @@ public class Daemon implements Runnable {
     private String username = "movieqotd";
     private String password = "dmitri1";
     /** TODO */
+    private boolean testmode;
+    /** TODO */
     private boolean running;
     /** TODO */
     private Thread thread;
@@ -67,6 +69,7 @@ public class Daemon implements Runnable {
 
     public Daemon() {
         state = State.NO_GAME;
+        testmode = true;
         // Register our shutdown hook
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
@@ -85,9 +88,10 @@ public class Daemon implements Runnable {
                         log.error("Caught exception while trying to create game!", e);
                     }
                     // Sleep until it's announce time
-                    //delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
-                    // TODO: for testing
-                    delta = 1000L;
+                    if (testmode)
+                        delta = 1000L;
+                    else
+                        delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
                     state = State.ANNOUNCE_GAME;
                     break;
                 case ANNOUNCE_GAME:
@@ -100,37 +104,82 @@ public class Daemon implements Runnable {
                     map.put("$GENRENAME$", game.getGenre().getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
                     // Send the tweet
-                    // TODO
-                    log.debug("Announce tweet: " + tweet);
+                    if (testmode)
+                        log.debug("Announce tweet: " + tweet);
+                    else {
+                        try {
+                            new Twitter(username, password).update(tweet);
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while sending tweet!", e);
+                        }
+                    }
                     // Sleep until it's time for the first round
-                    //delta = game.getStartTime().getTime() - System.currentTimeMillis();
-                    // TODO: for testing
-                    delta = 3000L;
+                    if (testmode)
+                        delta = 3000L;
+                    else
+                        delta = game.getStartTime().getTime() - System.currentTimeMillis();
                     state = State.FIRST_ROUND;
                     break;
                 case FIRST_ROUND:
                     log.debug("State: FIRST ROUND");
                     // Get the first part of the quote
-                    log.debug("First part of the quote: " + game.getQuote().getFirstPart());
-                    // Send the tweet
-                    // TODO
+                    if (testmode)
+                        log.debug("First part of the quote: " + game.getQuote().getFirstPart());
+                    else {
+                        // Send the tweet
+                        try {
+                            new Twitter(username, password).update(game.getQuote().getFirstPart());
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while sending tweet!", e);
+                        }
+                    }
                     // Sleep until it's time for the next round
-                    //delta = game.getTimeBetweenRounds();
-                    // TODO: for testing
-                    delta = 3000L;
+                    if (testmode)
+                        delta = 3000L;
+                    else
+                        delta = game.getTimeBetweenRounds();
                     state = State.SECOND_ROUND;
                     break;
                 case SECOND_ROUND:
                     log.debug("State: SECOND ROUND");
-                    // Did anyone get it?
-                    // TODO
-                    log.debug("Second part of the quote: " + game.getQuote().getSecondPart());
-                    // TODO: for testing
+
+                    // TODO: Did anyone get it?
+
+                    if (testmode)
+                        log.debug("Second part of the quote: " + game.getQuote().getSecondPart());
+                    else {
+                        // Send the tweet
+                        try {
+                            new Twitter(username, password).update(game.getQuote().getSecondPart());
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while sending tweet!", e);
+                        }
+                    }
+                    if (testmode)
+                        delta = 3000L;
+                    else
+                        delta = game.getTimeBetweenRounds();
                     state = State.THIRD_ROUND;
                     break;
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
-                    log.debug("Third part of the quote: " + game.getQuote().getThirdPart());
+
+                    // TODO: Did anyone get it?
+
+                    if (testmode)
+                        log.debug("Third part of the quote: " + game.getQuote().getThirdPart());
+                    else {
+                        // Send the tweet
+                        try {
+                            new Twitter(username, password).update(game.getQuote().getThirdPart());
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while sending tweet!", e);
+                        }
+                    }
+                    if (testmode)
+                        delta = 3000L;
+                    else
+                        delta = game.getTimeBetweenRounds();
                     state = State.GET_REPLIES;
                     break;
                 case GET_REPLIES:
