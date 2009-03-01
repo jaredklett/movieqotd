@@ -25,7 +25,7 @@ import java.util.*;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.12 2009/03/01 00:03:22 jklett Exp $
+ * @version $Id: Daemon.java,v 1.13 2009/03/01 00:12:29 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -89,7 +89,7 @@ public class Daemon implements Runnable {
                     }
                     // Sleep until it's announce time
                     if (timetestmode)
-                        delta = 1000L;
+                        delta = 2 * 60 * 1000L;
                     else
                         delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
                     state = State.ANNOUNCE_GAME;
@@ -117,7 +117,7 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the first round
                     if (timetestmode)
-                        delta = 3000L;
+                        delta = 2 * 60 * 1000L;
                     else
                         delta = game.getStartTime().getTime() - System.currentTimeMillis();
 
@@ -143,7 +143,7 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the next round
                     if (timetestmode)
-                        delta = 3000L;
+                        delta = 2 * 60 * 1000L;
                     else
                         delta = game.getTimeBetweenRounds();
 
@@ -174,7 +174,7 @@ public class Daemon implements Runnable {
                         }
                     }
                     if (timetestmode)
-                        delta = 3000L;
+                        delta = 2 * 60 * 1000L;
                     else
                         delta = game.getTimeBetweenRounds();
                     state = State.THIRD_ROUND;
@@ -202,7 +202,7 @@ public class Daemon implements Runnable {
                     }
 
                     if (timetestmode)
-                        delta = 3000L;
+                        delta = 2 * 60 * 1000L;
                     else
                         delta = game.getTimeBetweenRounds();
 
