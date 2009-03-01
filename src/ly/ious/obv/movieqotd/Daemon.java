@@ -25,10 +25,13 @@ import java.util.*;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.15 2009/03/01 00:41:04 jklett Exp $
+ * @version $Id: Daemon.java,v 1.16 2009/03/01 00:57:52 jklett Exp $
  */
 
 public class Daemon implements Runnable {
+
+    private static final long TEST_DELTA = 30 * 1000L;
+    //private static final long TEST_DELTA = 2 * 60 * 1000L;
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -89,7 +92,7 @@ public class Daemon implements Runnable {
                     }
                     // Sleep until it's announce time
                     if (timetestmode)
-                        delta = 2 * 60 * 1000L;
+                        delta = TEST_DELTA;
                     else
                         delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
                     state = State.ANNOUNCE_GAME;
@@ -117,7 +120,7 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the first round
                     if (timetestmode)
-                        delta = 2 * 60 * 1000L;
+                        delta = TEST_DELTA;
                     else
                         delta = game.getStartTime().getTime() - System.currentTimeMillis();
 
@@ -143,7 +146,7 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the next round
                     if (timetestmode)
-                        delta = 2 * 60 * 1000L;
+                        delta = TEST_DELTA;
                     else
                         delta = game.getTimeBetweenRounds();
 
@@ -174,7 +177,7 @@ public class Daemon implements Runnable {
                         }
                     }
                     if (timetestmode)
-                        delta = 2 * 60 * 1000L;
+                        delta = TEST_DELTA;
                     else
                         delta = game.getTimeBetweenRounds();
                     state = State.THIRD_ROUND;
@@ -202,7 +205,7 @@ public class Daemon implements Runnable {
                     }
 
                     if (timetestmode)
-                        delta = 2 * 60 * 1000L;
+                        delta = TEST_DELTA;
                     else
                         delta = game.getTimeBetweenRounds();
 
@@ -256,12 +259,22 @@ public class Daemon implements Runnable {
 
                     Map<String,String> awMap = new HashMap<String,String>();
                     awMap.put("$MOVIETITLE$", game.getMovie().getMovieTitle());
+
                     if (!noWinner)
                         awMap.put("$SCREENNAME$", game.getWinnerList().get(0).getUser().getScreenName());
+
                     String awTweet = StringUtils.mapReplace(StringUtils.mapSplit(winnerTemplate, awMap), awMap, "$");
-                    // Send the tweet
-                    // TODO
-                    log.debug("Announce winner tweet: " + awTweet);
+
+                    if (tweettestmode)
+                        log.debug("Announce winner tweet: " + awTweet);
+                    else {
+                        // Send the tweet
+                        try {
+                            new Twitter(username, password).update(awTweet);
+                        } catch (TwitterException e) {
+                            log.error("Caught exception while sending tweet!", e);
+                        }
+                    }
 
                     state = State.NO_GAME;
 
