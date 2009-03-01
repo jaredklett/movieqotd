@@ -20,18 +20,23 @@ import twitter4j.TwitterException;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.17 2009/03/01 01:08:47 jklett Exp $
+ * @version $Id: Daemon.java,v 1.18 2009/03/01 04:03:40 jklett Exp $
  */
 
 public class Daemon implements Runnable {
 
-    private static final long TEST_DELTA = 30 * 1000L;
+    private static final long TEST_DELTA = 20 * 1000L;
     //private static final long TEST_DELTA = 2 * 60 * 1000L;
+    private static final String NO_WINNER_TMPL = "no_winner.tmpl";
+    private static final String WINNER_ANNOUNCE_TMPL = "winner_announce.tmpl";
+    private static final String TRIVIA_ANNOUNCE_TMPL = "trivia_announce.tmpl";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -50,17 +55,14 @@ public class Daemon implements Runnable {
 
 // Instance variables /////////////////////////////////////////////////////////
 
+    // TODO: do something with this
     private String username = "movieqotd";
     private String password = "dmitri1";
-    /** TODO */
+
     private boolean timetestmode;
-    /** TODO */
     private boolean tweettestmode;
-    /** TODO */
     private boolean running;
-    /** TODO */
     private Thread thread;
-    /** TODO */
     private State state;
     /** An initialized but not running thread to call our clean up method when the JVM exits. */
     private Thread shutdownHook = new Thread(UUID.randomUUID().toString() + "-shutdownhook") {
@@ -100,8 +102,7 @@ public class Daemon implements Runnable {
                 case ANNOUNCE_GAME:
                     log.debug("State: ANNOUNCE GAME");
                     // Form the tweet
-                    // TODO: externalize
-                    String announceTemplate = TemplateLoader.loadTemplate("trivia_announce.tmpl");
+                    String announceTemplate = TemplateLoader.loadTemplate(TRIVIA_ANNOUNCE_TMPL);
                     Map<String,String> map = new HashMap<String,String>();
                     map.put("$GENRENAME$", game.getGenre().getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
@@ -246,13 +247,10 @@ public class Daemon implements Runnable {
 
                     // Form the tweet
                     String winnerTemplate;
-                    if (noWinner) {
-                        // TODO: externalize
-                        winnerTemplate = TemplateLoader.loadTemplate("no_winner.tmpl");
-                    } else {
-                        // TODO: externalize
-                        winnerTemplate = TemplateLoader.loadTemplate("winner_announce.tmpl");
-                    }
+                    if (noWinner)
+                        winnerTemplate = TemplateLoader.loadTemplate(NO_WINNER_TMPL);
+                    else
+                        winnerTemplate = TemplateLoader.loadTemplate(WINNER_ANNOUNCE_TMPL);
 
                     log.debug("Loaded template: " + winnerTemplate);
 
@@ -304,13 +302,18 @@ public class Daemon implements Runnable {
                 break;
             }
             for (Status reply : replies) {
-                // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
+                String title = game.getMovie().getMovieTitle();
+                // be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
+                if (title.startsWith("A") || title.startsWith("An") || title.startsWith("The")) {
+                    title = title.substring(title.indexOf(" ") + 1, title.length());
+                }
                 String text = reply.getText();
-                log.debug("Reply text: " + text);
-                String noScreenName = text.substring(text.indexOf(" "), text.length()).trim();
-                log.debug("Reply without screen name: " + noScreenName);
-                if (noScreenName.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
+                Pattern pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(text);
+                boolean isMatch = matcher.find();
+                if (isMatch) {
                     // possible WIN
+                    log.debug("Reply text: " + text);
                     game.addToWinnerList(reply);
                 }
             }
