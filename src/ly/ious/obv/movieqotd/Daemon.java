@@ -25,7 +25,7 @@ import java.util.*;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.11 2009/03/01 00:00:02 jklett Exp $
+ * @version $Id: Daemon.java,v 1.12 2009/03/01 00:03:22 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -50,7 +50,9 @@ public class Daemon implements Runnable {
     private String username = "movieqotd";
     private String password = "dmitri1";
     /** TODO */
-    private boolean testmode;
+    private boolean timetestmode;
+    /** TODO */
+    private boolean tweettestmode;
     /** TODO */
     private boolean running;
     /** TODO */
@@ -66,7 +68,8 @@ public class Daemon implements Runnable {
 
     public Daemon() {
         state = State.NO_GAME;
-        testmode = true;
+        timetestmode = true;
+        tweettestmode = false;
         // Register our shutdown hook
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
@@ -85,7 +88,7 @@ public class Daemon implements Runnable {
                         log.error("Caught exception while trying to create game!", e);
                     }
                     // Sleep until it's announce time
-                    if (testmode)
+                    if (timetestmode)
                         delta = 1000L;
                     else
                         delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
@@ -102,7 +105,7 @@ public class Daemon implements Runnable {
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
 
                     // Send the tweet
-                    if (testmode)
+                    if (tweettestmode)
                         log.debug("Announce tweet: " + tweet);
                     else {
                         try {
@@ -113,7 +116,7 @@ public class Daemon implements Runnable {
                     }
 
                     // Sleep until it's time for the first round
-                    if (testmode)
+                    if (timetestmode)
                         delta = 3000L;
                     else
                         delta = game.getStartTime().getTime() - System.currentTimeMillis();
@@ -127,7 +130,7 @@ public class Daemon implements Runnable {
                     log.debug("State: FIRST ROUND");
 
                     // Get the first part of the quote
-                    if (testmode)
+                    if (tweettestmode)
                         log.debug("First part of the quote: " + game.getQuote().getFirstPart());
                     else {
                         // Send the tweet
@@ -139,7 +142,7 @@ public class Daemon implements Runnable {
                     }
 
                     // Sleep until it's time for the next round
-                    if (testmode)
+                    if (timetestmode)
                         delta = 3000L;
                     else
                         delta = game.getTimeBetweenRounds();
@@ -160,7 +163,7 @@ public class Daemon implements Runnable {
                         break;
                     }
 
-                    if (testmode)
+                    if (tweettestmode)
                         log.debug("Second part of the quote: " + game.getQuote().getSecondPart());
                     else {
                         // Send the tweet
@@ -170,7 +173,7 @@ public class Daemon implements Runnable {
                             log.error("Caught exception while sending tweet!", e);
                         }
                     }
-                    if (testmode)
+                    if (timetestmode)
                         delta = 3000L;
                     else
                         delta = game.getTimeBetweenRounds();
@@ -187,7 +190,7 @@ public class Daemon implements Runnable {
                         break;
                     }
 
-                    if (testmode)
+                    if (tweettestmode)
                         log.debug("Third part of the quote: " + game.getQuote().getThirdPart());
                     else {
                         // Send the tweet
@@ -198,7 +201,7 @@ public class Daemon implements Runnable {
                         }
                     }
 
-                    if (testmode)
+                    if (timetestmode)
                         delta = 3000L;
                     else
                         delta = game.getTimeBetweenRounds();
