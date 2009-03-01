@@ -19,16 +19,13 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.10 2009/02/28 23:02:16 jklett Exp $
+ * @version $Id: Daemon.java,v 1.11 2009/03/01 00:00:02 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -103,6 +100,7 @@ public class Daemon implements Runnable {
                     Map<String,String> map = new HashMap<String,String>();
                     map.put("$GENRENAME$", game.getGenre().getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
+
                     // Send the tweet
                     if (testmode)
                         log.debug("Announce tweet: " + tweet);
@@ -113,15 +111,21 @@ public class Daemon implements Runnable {
                             log.error("Caught exception while sending tweet!", e);
                         }
                     }
+
                     // Sleep until it's time for the first round
                     if (testmode)
                         delta = 3000L;
                     else
                         delta = game.getStartTime().getTime() - System.currentTimeMillis();
+
                     state = State.FIRST_ROUND;
+
                     break;
+
                 case FIRST_ROUND:
+
                     log.debug("State: FIRST ROUND");
+
                     // Get the first part of the quote
                     if (testmode)
                         log.debug("First part of the quote: " + game.getQuote().getFirstPart());
@@ -133,17 +137,28 @@ public class Daemon implements Runnable {
                             log.error("Caught exception while sending tweet!", e);
                         }
                     }
+
                     // Sleep until it's time for the next round
                     if (testmode)
                         delta = 3000L;
                     else
                         delta = game.getTimeBetweenRounds();
+
                     state = State.SECOND_ROUND;
+
                     break;
+
                 case SECOND_ROUND:
+
                     log.debug("State: SECOND ROUND");
 
-                    // TODO: Did anyone get it?
+                    gatherReplies(game);
+
+                    if (game.getWinnerList().size() > 0) {
+                        // we have a winner!
+                        state = State.ANNOUNCE_WINNER;
+                        break;
+                    }
 
                     if (testmode)
                         log.debug("Second part of the quote: " + game.getQuote().getSecondPart());
@@ -164,7 +179,13 @@ public class Daemon implements Runnable {
                 case THIRD_ROUND:
                     log.debug("State: THIRD ROUND");
 
-                    // TODO: Did anyone get it?
+                    gatherReplies(game);
+
+                    if (game.getWinnerList().size() > 0) {
+                        // we have a winner!
+                        state = State.ANNOUNCE_WINNER;
+                        break;
+                    }
 
                     if (testmode)
                         log.debug("Third part of the quote: " + game.getQuote().getThirdPart());
@@ -176,34 +197,22 @@ public class Daemon implements Runnable {
                             log.error("Caught exception while sending tweet!", e);
                         }
                     }
+
                     if (testmode)
                         delta = 3000L;
                     else
                         delta = game.getTimeBetweenRounds();
+
                     state = State.GET_REPLIES;
+
                     break;
+
                 case GET_REPLIES:
+
                     log.debug("State: GET REPLIES");
-                    Twitter twitter = new Twitter(username, password);
-                    for (int i = 1; i < Integer.MAX_VALUE; i++) {
-                        List<Status> replies = null;
-                        try {
-                            replies = twitter.getRepliesByPage(i);
-                        } catch (TwitterException e) {
-                            log.error("Caught exception while retrieving replies!", e);
-                        }
-                        if (replies.size() == 0) {
-                            break;
-                        }
-                        for (Status reply : replies) {
-                            // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
-                            String text = reply.getText();
-                            if (text.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
-                                // possible WIN
-                                game.addToWinnerList(reply);
-                            }
-                        }
-                    }
+
+                    gatherReplies(game);
+
                     if (game.getWinnerList().size() == 0) {
                         // no winners yet, go to the next round
                         if (state == State.FIRST_ROUND) {
@@ -217,13 +226,19 @@ public class Daemon implements Runnable {
                         // we have one or more winners
                         state = State.ANNOUNCE_WINNER;
                     }
+
                     break;
+
                 case ANNOUNCE_WINNER:
+
                     log.debug("State: ANNOUNCE WINNER");
+
                     boolean noWinner = game.getWinnerList().size() == 0;
+
                     if (!noWinner) {
                         game.sortWinnerList();
                     }
+
                     // Form the tweet
                     String winnerTemplate;
                     if (noWinner) {
@@ -233,7 +248,9 @@ public class Daemon implements Runnable {
                         // TODO: externalize
                         winnerTemplate = TemplateLoader.loadTemplate("winner_announce.tmpl");
                     }
+
                     log.debug("Loaded template: " + winnerTemplate);
+
                     Map<String,String> awMap = new HashMap<String,String>();
                     awMap.put("$MOVIETITLE$", game.getMovie().getMovieTitle());
                     if (!noWinner)
@@ -242,9 +259,15 @@ public class Daemon implements Runnable {
                     // Send the tweet
                     // TODO
                     log.debug("Announce winner tweet: " + awTweet);
+
+                    state = State.NO_GAME;
+
                     break;
+
                 default:
+
                     log.debug("State: UNKNOWN");
+
                     break;
             }
             try { Thread.sleep(delta); } catch (InterruptedException e) { /* ignored */ }
@@ -252,6 +275,29 @@ public class Daemon implements Runnable {
     }
 
 // Instance methods ///////////////////////////////////////////////////////////
+
+    private void gatherReplies(Game game) {
+        Twitter twitter = new Twitter(username, password);
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            List<Status> replies = new ArrayList<Status>();
+            try {
+                replies = twitter.getRepliesByPage(i);
+            } catch (TwitterException e) {
+                log.error("Caught exception while retrieving replies!", e);
+            }
+            if (replies.size() == 0) {
+                break;
+            }
+            for (Status reply : replies) {
+                // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
+                String text = reply.getText();
+                if (text.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
+                    // possible WIN
+                    game.addToWinnerList(reply);
+                }
+            }
+        }
+    }
 
     /**
      * Creates and starts a thread with this object.
