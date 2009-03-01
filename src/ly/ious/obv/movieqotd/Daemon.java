@@ -25,7 +25,7 @@ import java.util.*;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.16 2009/03/01 00:57:52 jklett Exp $
+ * @version $Id: Daemon.java,v 1.17 2009/03/01 01:08:47 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -102,7 +102,6 @@ public class Daemon implements Runnable {
                     // Form the tweet
                     // TODO: externalize
                     String announceTemplate = TemplateLoader.loadTemplate("trivia_announce.tmpl");
-                    log.debug("Loaded template: " + announceTemplate);
                     Map<String,String> map = new HashMap<String,String>();
                     map.put("$GENRENAME$", game.getGenre().getGenreName());
                     String tweet = StringUtils.mapReplace(StringUtils.mapSplit(announceTemplate, map), map, "$");
