@@ -25,7 +25,7 @@ import java.util.*;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.13 2009/03/01 00:12:29 jklett Exp $
+ * @version $Id: Daemon.java,v 1.14 2009/03/01 00:33:52 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -294,7 +294,10 @@ public class Daemon implements Runnable {
             for (Status reply : replies) {
                 // TODO FIXME: be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
                 String text = reply.getText();
-                if (text.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
+                log.debug("Reply text: " + text);
+                String noScreenName = text.substring(text.indexOf(" "), text.length());
+                log.debug("Reply without screen name: " + noScreenName);
+                if (noScreenName.equalsIgnoreCase(game.getMovie().getMovieTitle())) {
                     // possible WIN
                     game.addToWinnerList(reply);
                 }
