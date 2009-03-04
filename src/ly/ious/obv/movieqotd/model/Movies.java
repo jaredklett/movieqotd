@@ -27,14 +27,14 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Movies.java,v 1.6 2009/03/04 01:24:29 jklett Exp $
+ * @version $Id: Movies.java,v 1.7 2009/03/04 01:58:11 jklett Exp $
  */
 
 public class Movies {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.6 $";
+    public static final String CVS_REV = "$Revision: 1.7 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -64,6 +64,10 @@ public class Movies {
             MID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
     };
 
+    private static final Object[] WHERE_GET_MOVIE_BY_TITLE = {
+            MOVIE_TITLE, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
+    };
+
     /** Generated SQL which loads all the rows in the table. */
     private static final String SQL_SELECT = SQLBuilder.buildSelect(
             new Table[] {TABLE},
@@ -75,6 +79,12 @@ public class Movies {
             new Table[] {TABLE},
             ALL_COLUMNS,
             WHERE_GET_MOVIE_BY_MID
+    );
+
+    private static final String SQL_GET_MOVIE_BY_TITLE = SQLBuilder.buildSelect(
+            new Table[] {TABLE},
+            ALL_COLUMNS,
+            WHERE_GET_MOVIE_BY_TITLE
     );
 
     private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
@@ -93,10 +103,20 @@ public class Movies {
 
 // Class methods //////////////////////////////////////////////////////////////
 
-    public static Movies getMovie(Connection connection, int mid) throws SQLException {
+    public static Movies getMovieById(Connection connection, int mid) throws SQLException {
         Movies movie = null;
         Object[] values = { mid };
         ResultSet rs = SQLExec.doQuery(connection, SQL_GET_MOVIE_BY_MID, values);
+        if (rs.next())
+            movie = setParams(rs);
+        rs.close();
+        return movie;
+    }
+
+    public static Movies getMovieByTitle(Connection connection, String movieTitle) throws SQLException {
+        Movies movie = null;
+        Object[] values = { movieTitle };
+        ResultSet rs = SQLExec.doQuery(connection, SQL_GET_MOVIE_BY_TITLE, values);
         if (rs.next())
             movie = setParams(rs);
         rs.close();
