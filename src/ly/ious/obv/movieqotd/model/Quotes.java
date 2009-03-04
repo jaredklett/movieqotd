@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.11 2009/02/14 22:23:36 jklett Exp $
+ * @version $Id: Quotes.java,v 1.12 2009/03/04 01:24:29 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.11 $";
+    public static final String CVS_REV = "$Revision: 1.12 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -58,6 +58,10 @@ public class Quotes {
 
     private static final Column[] ALL_COLUMNS = {
             QID, MID, QUOTE_TEXT, USED, USED_DATESTAMP
+    };
+
+    private static final Column[] INSERT_COLUMNS = {
+            MID, QUOTE_TEXT
     };
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
@@ -86,6 +90,8 @@ public class Quotes {
             ALL_COLUMNS,
             WHERE_GET_QUOTE_BY_QID
     );
+
+    private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
 
     private static final String SQL_UPDATE_USED = SQLBuilder.buildUpdate(
             new Table[] {TABLE},
@@ -127,13 +133,6 @@ public class Quotes {
         rs.close();
         Quotes randomQuote = list.get(new Random().nextInt(list.size()));
         String quoteText = randomQuote.getQuoteText();
-        int len = quoteText.length();
-        int wordsPerPart = len / 3;
-
-//        randomQuote.setFirstPart(quoteText.substring(0, wordsPerPart));
-//        randomQuote.setSecondPart(quoteText.substring(wordsPerPart, wordsPerPart * 2));
-//        randomQuote.setThirdPart(quoteText.substring(wordsPerPart * 2, len));
-
         String[] words = quoteText.split(" ");
         int wordCountPerPart = words.length / 3;
         int[] counts = new int[3];
@@ -165,6 +164,15 @@ public class Quotes {
             quote = setParams(rs);
         rs.close();
         return quote;
+    }
+
+    public static boolean create(Connection connection, int movieId, String quoteText) throws SQLException {
+        Object[] values = { movieId, quoteText };
+        int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
+        boolean success = rowsInserted > 0;
+        if (!success)
+            log.warn("Attempted to create record; " + rowsInserted + " returned from insert!");
+        return success;
     }
 
     /**

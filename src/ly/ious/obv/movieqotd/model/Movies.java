@@ -15,6 +15,7 @@ package ly.ious.obv.movieqotd.model;
 import com.blipnetworks.sql.SQLBuilder;
 import com.blipnetworks.sql.SQLConstants;
 import com.blipnetworks.sql.SQLExec;
+import org.apache.log4j.Logger;
 import org.javaforge.sql.Column;
 import org.javaforge.sql.Table;
 
@@ -26,14 +27,19 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Movies.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
+ * @version $Id: Movies.java,v 1.6 2009/03/04 01:24:29 jklett Exp $
  */
 
 public class Movies {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.5 $";
+    public static final String CVS_REV = "$Revision: 1.6 $";
+
+// Static variables ///////////////////////////////////////////////////////////
+
+    /** Our logging facility. */
+    private static Logger log = Logger.getLogger(Movies.class);
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -46,6 +52,10 @@ public class Movies {
 
     private static final Column[] ALL_COLUMNS = {
             MID, MOVIE_TITLE, GID
+    };
+
+    private static final Column[] INSERT_COLUMNS = {
+            MOVIE_TITLE, GID
     };
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
@@ -66,6 +76,8 @@ public class Movies {
             ALL_COLUMNS,
             WHERE_GET_MOVIE_BY_MID
     );
+
+    private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
 
 // Instance variables /////////////////////////////////////////////////////////
 
@@ -89,6 +101,15 @@ public class Movies {
             movie = setParams(rs);
         rs.close();
         return movie;
+    }
+
+    public static boolean create(Connection connection, String movieTitle, int genreId) throws SQLException {
+        Object[] values = { movieTitle, genreId };
+        int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
+        boolean success = rowsInserted > 0;
+        if (!success)
+            log.warn("Attempted to create record; " + rowsInserted + " returned from insert!");
+        return success;
     }
 
     /**
