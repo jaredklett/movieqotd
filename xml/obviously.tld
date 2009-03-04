@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+		"http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+<taglib>
+
+	<tlibversion>0.1</tlibversion>
+	<jspversion>1.1</jspversion>
+	<shortname>obviously</shortname>
+	<uri>com.blipnetworks.taglib.ALL_TAGS-0.1</uri>
+	<info>Obviously Tag Library</info>
+
+	<tag>
+		<name>hasMessage</name>
+		<tagclass>ly.ious.obv.movieqotd.taglib.IsMessageTag</tagclass>
+		<bodycontent>JSP</bodycontent>
+		<info>Evaluate the body if there is a message</info>
+		<attribute>
+			<!-- The session attribute name to use, if specified -->
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<!-- Reverse the semantics - see javadoc -->
+			<name>opposite</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+
+	<tag>
+		<name>message</name>
+		<tagclass>ly.ious.obv.movieqotd.taglib.MessageTag</tagclass>
+		<!-- Body of this tag is required to be empty -->
+		<bodycontent>empty</bodycontent>
+		<info>Outputs a string representation of the message</info>
+		<attribute>
+			<!-- The session attribute name to use, if specified -->
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<!-- Reset the message value when displayed; true by default -->
+			<name>reset</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<!-- Instead of printing the message, set the message as provided herein -->
+			<name>set</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+
+</taglib>
