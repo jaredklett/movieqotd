@@ -1,6 +1,10 @@
 <%@ page language="java" contentType="text/html" %>
-<%@ page import="ly.ious.obv.movieqotd.Constants" %>
+<%@ page import="com.blipnetworks.sql.DataSourceManager" %>
+<%@ page import="ly.ious.obv.movieqotd.Constants"%>
 <%@ page import="ly.ious.obv.movieqotd.Controller"%>
+<%@ page import="ly.ious.obv.movieqotd.model.Genres"%>
+<%@ page import="java.sql.Connection"%>
+<%@ page import="java.sql.SQLException"%>
 
 <%@ taglib uri="obviously.tld" prefix="obviously" %>
 
@@ -25,6 +29,23 @@
     <input type="hidden" name="<%= Constants.PARAMETER_OKAY %>" value="<%= okayPage %>">
     <p>Movie title: <input type="text" name="<%= Controller.PARAMETER_MOVIE_TITLE %>" size="20" maxlength="50" value=""></p>
     <p>Quote text: <input type="text" name="<%= Controller.PARAMETER_QUOTE_TEXT %>" size="20" maxlength="50" value=""></p>
+    <select name="<%= Controller.PARAMETER_GENRE_ID %>">
+<%
+    Connection slaveConnection = null;
+    Genres[] genres = new Genres[0];
+    try {
+        slaveConnection = DataSourceManager.getSlaveConnection("obviously");
+        genres = Genres.getAll(slaveConnection);
+    } catch (SQLException e) {
+        // do nothing
+    } finally {
+        if (slaveConnection != null) try { slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
+    }
+    for (Genres genre : genres) {
+%>
+        <option value="<%= genre.getGenreId() %>"><%= genre.getGenreName() %></option>
+<%  } %>
+    </select>
     <input type="submit" value="Submit">
 </form>
 
