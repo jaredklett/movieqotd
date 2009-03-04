@@ -15,25 +15,37 @@ package ly.ious.obv.movieqotd.model;
 import com.blipnetworks.sql.SQLBuilder;
 import com.blipnetworks.sql.SQLConstants;
 import com.blipnetworks.sql.SQLExec;
+import org.apache.log4j.Logger;
 import org.javaforge.sql.Column;
 import org.javaforge.sql.Table;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Genres.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
+ * @version $Id: Genres.java,v 1.6 2009/03/04 00:55:07 jklett Exp $
  */
 
 public class Genres {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.5 $";
+    public static final String CVS_REV = "$Revision: 1.6 $";
+
+// Constants //////////////////////////////////////////////////////////////////
+
+    private static final Genres[] TYPE_ARRAY = new Genres[0];
+
+// Static variables ///////////////////////////////////////////////////////////
+
+    /** Our logging facility. */
+    private static Logger log = Logger.getLogger(Genres.class);
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -47,6 +59,10 @@ public class Genres {
             GID, GENRE_NAME
     };
 
+    private static final Column[] INSERT_COLUMNS = {
+            GENRE_NAME
+    };
+
 // Pre-made SQL queries ///////////////////////////////////////////////////////
 
     private static final Object[] WHERE_GET_GENRE_BY_GID = {
@@ -57,7 +73,8 @@ public class Genres {
     private static final String SQL_SELECT = SQLBuilder.buildSelect(
             new Table[] {TABLE},
             ALL_COLUMNS,
-            null
+            null,
+            SQLConstants.SQL_ASC
     );
 
     private static final String SQL_GET_GENRE_BY_GID = SQLBuilder.buildSelect(
@@ -65,6 +82,8 @@ public class Genres {
             ALL_COLUMNS,
             WHERE_GET_GENRE_BY_GID
     );
+
+    private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
 
 // Instance variables /////////////////////////////////////////////////////////
 
@@ -79,6 +98,19 @@ public class Genres {
 
 // Class methods //////////////////////////////////////////////////////////////
 
+    public static Genres[] getAll(Connection connection) throws SQLException {
+        List<Genres> list = new ArrayList<Genres>();
+        Object[] values = {
+                2 // order by name
+        };
+        ResultSet rs = SQLExec.doQuery(connection, SQL_SELECT, values);
+        while (rs.next()) {
+            list.add(setParams(rs));
+        }
+        rs.close();
+        return list.toArray(TYPE_ARRAY);
+    }
+
     public static Genres getGenre(Connection connection, int gid) throws SQLException {
         Genres genre = null;
         Object[] values = { gid };
@@ -87,6 +119,15 @@ public class Genres {
             genre = setParams(rs);
         rs.close();
         return genre;
+    }
+
+    public static boolean create(Connection connection, String genreName) throws SQLException {
+        Object[] values = { genreName };
+        int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
+        boolean success = rowsInserted > 0;
+        if (!success)
+            log.warn("Attempted to create record; " + rowsInserted + " returned from insert!");
+        return success;
     }
 
     /**
