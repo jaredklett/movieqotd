@@ -29,7 +29,7 @@
     <input type="hidden" name="<%= Constants.PARAMETER_OKAY %>" value="<%= okayPage %>">
     <p>Movie title: <input type="text" name="<%= Controller.PARAMETER_MOVIE_TITLE %>" size="20" maxlength="50" value=""></p>
     <p>Quote text: <input type="text" name="<%= Controller.PARAMETER_QUOTE_TEXT %>" size="20" maxlength="50" value=""></p>
-    <select name="<%= Controller.PARAMETER_GENRE_ID %>">
+    <p>Select genre: <select name="<%= Controller.PARAMETER_GENRE_ID %>">
 <%
     Connection slaveConnection = null;
     Genres[] genres = new Genres[0];
@@ -45,7 +45,7 @@
 %>
         <option value="<%= genre.getGenreId() %>"><%= genre.getGenreName() %></option>
 <%  } %>
-    </select>
+    </select></p>
     <input type="submit" value="Submit">
 </form>
 
