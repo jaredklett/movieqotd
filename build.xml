@@ -1,4 +1,4 @@
-<!-- $Id: build.xml,v 1.4 2009/03/04 03:02:04 jklett Exp $ -->
+<!-- $Id: build.xml,v 1.5 2009/03/04 03:38:36 jklett Exp $ -->
 <project name="MovieQOTD" default="build" basedir=".">
 
     <property name="build" value="build"/>
@@ -56,6 +56,8 @@
     <target name="makewar" depends="makejar">
         <mkdir dir="${webapp}"/>
         <copy file="${xml}/obviously.tld" tofile="${webapp}/WEB-INF/obviously.tld"/>
+        <mkdir dir="${webapp}/WEB-INF/classes"/>
+        <copy file="${etc}/poolman.xml" tofile="${webapp}/WEB-INF/classes/poolman.xml"/>
         <copy todir="${webapp}">
             <fileset dir="${jsp}"/>
         </copy>
