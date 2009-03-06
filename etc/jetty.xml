@@ -26,7 +26,7 @@
     </Set>
     <Call name="addWebApplication">
         <Arg>/</Arg>
-        <Arg>webapps/movieqotd.war</Arg>
+        <Arg>movieqotd.war</Arg>
         <Set name="extractWAR">true</Set>
     </Call>
     <Set name="requestsPerGC">2000</Set>
