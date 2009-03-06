@@ -1,4 +1,4 @@
-<!-- $Id: build.xml,v 1.7 2009/03/06 22:02:52 jklett Exp $ -->
+<!-- $Id: build.xml,v 1.8 2009/03/06 22:04:17 jklett Exp $ -->
 <project name="MovieQOTD" default="all" basedir=".">
 
     <property name="build" value="build"/>
@@ -69,6 +69,7 @@
 
     <target name="clean">
         <delete dir="${build}"/>
+        <delete dir="${classes}"/>
         <delete dir="${webapp}"/>
         <delete file="${jarfile}"/>
         <delete file="${warfile}"/>
