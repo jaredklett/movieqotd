@@ -27,8 +27,8 @@
 <form method="post" action="/controller">
     <input type="hidden" name="<%= Constants.PARAMETER_COMMAND %>" value="<%= Controller.COMMAND_CREATE_QUOTE %>">
     <input type="hidden" name="<%= Constants.PARAMETER_OKAY %>" value="<%= okayPage %>">
-    <p>Movie title: <input type="text" name="<%= Controller.PARAMETER_MOVIE_TITLE %>" size="20" maxlength="50" value=""></p>
-    <p>Quote text: <input type="text" name="<%= Controller.PARAMETER_QUOTE_TEXT %>" size="20" maxlength="50" value=""></p>
+    <p>Movie title: <input type="text" name="<%= Controller.PARAMETER_MOVIE_TITLE %>" size="50" maxlength="100" value=""></p>
+    <p>Quote text: <input type="text" name="<%= Controller.PARAMETER_QUOTE_TEXT %>" size="50" maxlength="140" value=""></p>
     <p>Select genre: <select name="<%= Controller.PARAMETER_GENRE_ID %>">
 <%
     Connection slaveConnection = null;
