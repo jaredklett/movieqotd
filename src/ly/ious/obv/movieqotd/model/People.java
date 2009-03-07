@@ -17,6 +17,7 @@ import com.blipnetworks.sql.SQLConstants;
 import com.blipnetworks.sql.SQLExec;
 import org.javaforge.sql.Column;
 import org.javaforge.sql.Table;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,14 +27,19 @@ import java.sql.SQLException;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: People.java,v 1.4 2009/02/14 18:00:35 jklett Exp $
+ * @version $Id: People.java,v 1.5 2009/03/07 20:45:21 jklett Exp $
  */
 
 public class People {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.4 $";
+    public static final String CVS_REV = "$Revision: 1.5 $";
+
+// Static variables ///////////////////////////////////////////////////////////
+
+    /** Our logging facility. */
+    private static Logger log = Logger.getLogger(People.class);
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -47,10 +53,18 @@ public class People {
             PID, TWITTER_NAME
     };
 
+    private static final Column[] INSERT_COLUMNS = {
+            TWITTER_NAME
+    };
+
 // Pre-made SQL queries ///////////////////////////////////////////////////////
 
     private static final Object[] WHERE_GET_PEOPLE_BY_PID = {
             PID, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
+    };
+
+    private static final Object[] WHERE_GET_PEOPLE_BY_NAME = {
+            TWITTER_NAME, SQLConstants.SQL_EQ, SQLConstants.SQL_QUES
     };
 
     /** Generated SQL which loads all the rows in the table. */
@@ -66,6 +80,14 @@ public class People {
             WHERE_GET_PEOPLE_BY_PID
     );
 
+    private static final String SQL_GET_PEOPLE_BY_NAME = SQLBuilder.buildSelect(
+            new Table[] {TABLE},
+            ALL_COLUMNS,
+            WHERE_GET_PEOPLE_BY_NAME
+    );
+
+    private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
+
 // Instance variables /////////////////////////////////////////////////////////
 
     private int pid;
@@ -79,7 +101,7 @@ public class People {
 
 // Class methods //////////////////////////////////////////////////////////////
 
-    public static People getPeople(Connection connection, int pid) throws SQLException {
+    public static People getPeopleById(Connection connection, int pid) throws SQLException {
         People people = null;
         Object[] values = { pid };
         ResultSet rs = SQLExec.doQuery(connection, SQL_GET_PEOPLE_BY_PID, values);
@@ -87,6 +109,25 @@ public class People {
             people = setParams(rs);
         rs.close();
         return people;
+    }
+
+    public static People getPeopleByName(Connection connection, String twitterName) throws SQLException {
+        People people = null;
+        Object[] values = { twitterName };
+        ResultSet rs = SQLExec.doQuery(connection, SQL_GET_PEOPLE_BY_NAME, values);
+        if (rs.next())
+            people = setParams(rs);
+        rs.close();
+        return people;
+    }
+
+    public static boolean create(Connection connection, String twitterName) throws SQLException {
+        Object[] values = { twitterName };
+        int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
+        boolean success = rowsInserted > 0;
+        if (!success)
+            log.warn("Attempted to create record; " + rowsInserted + " returned from insert!");
+        return success;
     }
 
     /**

@@ -17,6 +17,7 @@ import com.blipnetworks.sql.SQLConstants;
 import com.blipnetworks.sql.SQLExec;
 import org.javaforge.sql.Column;
 import org.javaforge.sql.Table;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,14 +28,19 @@ import java.util.Date;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Winners.java,v 1.5 2009/02/14 22:05:56 jklett Exp $
+ * @version $Id: Winners.java,v 1.6 2009/03/07 20:45:21 jklett Exp $
  */
 
 public class Winners {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.5 $";
+    public static final String CVS_REV = "$Revision: 1.6 $";
+
+// Static variables ///////////////////////////////////////////////////////////
+
+    /** Our logging facility. */
+    private static Logger log = Logger.getLogger(Winners.class);
 
 // Table structure ////////////////////////////////////////////////////////////
 
@@ -48,6 +54,10 @@ public class Winners {
 
     private static final Column[] ALL_COLUMNS = {
             WID, PID, QID, DATESTAMP
+    };
+
+    private static final Column[] INSERT_COLUMNS = {
+            PID, QID
     };
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
@@ -68,6 +78,8 @@ public class Winners {
             ALL_COLUMNS,
             WHERE_GET_WINNER_BY_WID
     );
+
+    private static final String SQL_INSERT = SQLBuilder.buildInsert(TABLE, INSERT_COLUMNS, null);
 
 // Instance variables /////////////////////////////////////////////////////////
 
@@ -92,6 +104,15 @@ public class Winners {
             winner = setParams(rs);
         rs.close();
         return winner;
+    }
+
+    public static boolean create(Connection connection, int personId, int quoteId) throws SQLException {
+        Object[] values = { personId, quoteId };
+        int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
+        boolean success = rowsInserted > 0;
+        if (!success)
+            log.warn("Attempted to create record; " + rowsInserted + " returned from insert!");
+        return success;
     }
 
     /**

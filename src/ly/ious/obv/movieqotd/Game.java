@@ -30,7 +30,7 @@ import java.util.*;
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.3 2009/03/06 22:07:51 jklett Exp $
+ * @version $Id: Game.java,v 1.4 2009/03/07 20:45:21 jklett Exp $
  */
 
 public class Game {
@@ -114,9 +114,9 @@ public class Game {
         masterConnection = DataSourceManager.getMasterConnection(site);
         slaveConnection = DataSourceManager.getSlaveConnection(site);
         log.debug("Opened database connections...");
-            quote = Quotes.getRandomQuote(slaveConnection);
-            movie = Movies.getMovieById(slaveConnection, quote.getMovieId());
-            genre = Genres.getGenre(slaveConnection, movie.getGenreId());
+        quote = Quotes.getRandomQuote(slaveConnection);
+        movie = Movies.getMovieById(slaveConnection, quote.getMovieId());
+        genre = Genres.getGenre(slaveConnection, movie.getGenreId());
         // Mark that it's been used
         quote.setUsed(true);
         quote.setUsedDatestamp(new Date());

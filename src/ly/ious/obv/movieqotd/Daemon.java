@@ -17,17 +17,23 @@ import org.javaforge.util.StringUtils;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
+import twitter4j.User;
 
 import java.sql.SQLException;
+import java.sql.Connection;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import ly.ious.obv.movieqotd.model.People;
+import ly.ious.obv.movieqotd.model.Winners;
+import com.blipnetworks.sql.DataSourceManager;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.18 2009/03/01 04:03:40 jklett Exp $
+ * @version $Id: Daemon.java,v 1.19 2009/03/07 20:45:21 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -257,8 +263,29 @@ public class Daemon implements Runnable {
                     Map<String,String> awMap = new HashMap<String,String>();
                     awMap.put("$MOVIETITLE$", game.getMovie().getMovieTitle());
 
-                    if (!noWinner)
-                        awMap.put("$SCREENNAME$", game.getWinnerList().get(0).getUser().getScreenName());
+                    User winnerUser = game.getWinnerList().get(0).getUser();
+                    if (!noWinner) {
+                        // Create the person if necessary and add them to the winners table
+                        Connection masterConnection = null;
+                        Connection slaveConnection = null;
+                        try {
+                            masterConnection = DataSourceManager.getMasterConnection("obviously");
+                            slaveConnection = DataSourceManager.getSlaveConnection("obviously");
+                            People winnerPerson = People.getPeopleByName(slaveConnection, winnerUser.getScreenName());
+                            if (winnerPerson == null) {
+                                People.create(masterConnection, winnerUser.getScreenName());
+                                winnerPerson = People.getPeopleByName(slaveConnection, winnerUser.getScreenName());
+                            }
+                            Winners.create(masterConnection, winnerPerson.getPid(), game.getQuote().getQuoteId());
+                        } catch (SQLException e) {
+                            log.error("Caught exception while trying to update ");
+                        } finally {
+                            try { if (masterConnection != null) masterConnection.close(); } catch (SQLException e) { /* ignored */ }
+                            try { if (slaveConnection != null) slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
+                        }
+                        // Add their name to the template substitution map
+                        awMap.put("$SCREENNAME$", winnerUser.getScreenName());
+                    }
 
                     String awTweet = StringUtils.mapReplace(StringUtils.mapSplit(winnerTemplate, awMap), awMap, "$");
 
