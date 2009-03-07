@@ -31,14 +31,14 @@ import java.util.Random;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Quotes.java,v 1.12 2009/03/04 01:24:29 jklett Exp $
+ * @version $Id: Quotes.java,v 1.13 2009/03/07 21:23:09 jklett Exp $
  */
 
 public class Quotes {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.12 $";
+    public static final String CVS_REV = "$Revision: 1.13 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -120,6 +120,13 @@ public class Quotes {
 
 // Class methods //////////////////////////////////////////////////////////////
 
+    /**
+     * TODO: don't load all the quotes into memory... choose one randomly and query for it.
+     * 
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
     public static Quotes getRandomQuote(Connection connection) throws SQLException {
         List<Quotes> list = new ArrayList<Quotes>();
         Object[] values = {

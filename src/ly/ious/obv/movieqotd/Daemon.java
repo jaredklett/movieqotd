@@ -33,7 +33,7 @@ import com.blipnetworks.sql.DataSourceManager;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.20 2009/03/07 20:50:22 jklett Exp $
+ * @version $Id: Daemon.java,v 1.21 2009/03/07 21:23:09 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -86,11 +86,15 @@ public class Daemon implements Runnable {
     }
 
     public void run() {
-        long delta = 5000L;
+        long sleepTime = 5000L;
         Game game = null;
+
         while (running) {
+
             switch (state) {
+
                 case NO_GAME:
+
                     log.debug("State: NO GAME");
                     // Create a new game
                     try {
@@ -100,12 +104,16 @@ public class Daemon implements Runnable {
                     }
                     // Sleep until it's announce time
                     if (timetestmode)
-                        delta = TEST_DELTA;
+                        sleepTime = TEST_DELTA;
                     else
-                        delta = game.getAnnounceTime().getTime() - System.currentTimeMillis();
+                        sleepTime = game.getAnnounceTime().getTime() - System.currentTimeMillis();
+
                     state = State.ANNOUNCE_GAME;
+
                     break;
+
                 case ANNOUNCE_GAME:
+
                     log.debug("State: ANNOUNCE GAME");
                     // Form the tweet
                     String announceTemplate = TemplateLoader.loadTemplate(TRIVIA_ANNOUNCE_TMPL);
@@ -126,9 +134,9 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the first round
                     if (timetestmode)
-                        delta = TEST_DELTA;
+                        sleepTime = TEST_DELTA;
                     else
-                        delta = game.getStartTime().getTime() - System.currentTimeMillis();
+                        sleepTime = game.getStartTime().getTime() - System.currentTimeMillis();
 
                     state = State.FIRST_ROUND;
 
@@ -152,9 +160,9 @@ public class Daemon implements Runnable {
 
                     // Sleep until it's time for the next round
                     if (timetestmode)
-                        delta = TEST_DELTA;
+                        sleepTime = TEST_DELTA;
                     else
-                        delta = game.getTimeBetweenRounds();
+                        sleepTime = game.getTimeBetweenRounds();
 
                     state = State.SECOND_ROUND;
 
@@ -183,12 +191,16 @@ public class Daemon implements Runnable {
                         }
                     }
                     if (timetestmode)
-                        delta = TEST_DELTA;
+                        sleepTime = TEST_DELTA;
                     else
-                        delta = game.getTimeBetweenRounds();
+                        sleepTime = game.getTimeBetweenRounds();
+
                     state = State.THIRD_ROUND;
+
                     break;
+
                 case THIRD_ROUND:
+
                     log.debug("State: THIRD ROUND");
 
                     gatherReplies(game);
@@ -211,9 +223,9 @@ public class Daemon implements Runnable {
                     }
 
                     if (timetestmode)
-                        delta = TEST_DELTA;
+                        sleepTime = TEST_DELTA;
                     else
-                        delta = game.getTimeBetweenRounds();
+                        sleepTime = game.getTimeBetweenRounds();
 
                     state = State.GET_REPLIES;
 
@@ -310,7 +322,7 @@ public class Daemon implements Runnable {
 
                     break;
             }
-            try { Thread.sleep(delta); } catch (InterruptedException e) { /* ignored */ }
+            try { Thread.sleep(sleepTime); } catch (InterruptedException e) { /* ignored */ }
         }
     }
 

@@ -30,7 +30,7 @@ import java.util.*;
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.4 2009/03/07 20:45:21 jklett Exp $
+ * @version $Id: Game.java,v 1.5 2009/03/07 21:23:09 jklett Exp $
  */
 
 public class Game {
@@ -67,8 +67,8 @@ public class Game {
     /** TODO */
     private static String site;
 
-    public static final String DEFAULT_ANNOUNCE_TIME = "12:00 EST";
-    public static final String DEFAULT_START_TIME = "13:00 EST";
+    public static final String DEFAULT_ANNOUNCE_TIME = "13:00 EST";
+    public static final String DEFAULT_START_TIME = "14:00 EST";
     public static final long DEFAULT_TIME_BETWEEN_ROUNDS = 60 * 60 * 1000L;
     public static final String DEFAULT_SITE = "obviously";
 
