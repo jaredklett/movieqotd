@@ -28,14 +28,14 @@ import java.util.Date;
  * TODO
  *
  * @author Jared Klett
- * @version $Id: Winners.java,v 1.6 2009/03/07 20:45:21 jklett Exp $
+ * @version $Id: Winners.java,v 1.7 2009/03/07 20:53:37 jklett Exp $
  */
 
 public class Winners {
 
 // CVS info ///////////////////////////////////////////////////////////////////
 
-    public static final String CVS_REV = "$Revision: 1.6 $";
+    public static final String CVS_REV = "$Revision: 1.7 $";
 
 // Static variables ///////////////////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ public class Winners {
     };
 
     private static final Column[] INSERT_COLUMNS = {
-            PID, QID
+            PID, QID, DATESTAMP
     };
 
 // Pre-made SQL queries ///////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ public class Winners {
     }
 
     public static boolean create(Connection connection, int personId, int quoteId) throws SQLException {
-        Object[] values = { personId, quoteId };
+        Object[] values = { personId, quoteId, new Date() };
         int rowsInserted = SQLExec.doUpdate(connection, SQL_INSERT, values);
         boolean success = rowsInserted > 0;
         if (!success)
