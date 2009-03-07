@@ -48,3 +48,23 @@ CREATE TABLE trivia_winners (
     trivia_id INT NOT NULL,
     datestamp DATETIME NOT NULL
 ) ENGINE=InnoDb;
+
+INSERT INTO movie_genres (genre_name) VALUES ('Action');
+INSERT INTO movie_genres (genre_name) VALUES ('Adventure');
+INSERT INTO movie_genres (genre_name) VALUES ('Animation');
+INSERT INTO movie_genres (genre_name) VALUES ('Comedy');
+INSERT INTO movie_genres (genre_name) VALUES ('Crime');
+INSERT INTO movie_genres (genre_name) VALUES ('Documentary');
+INSERT INTO movie_genres (genre_name) VALUES ('Drama');
+INSERT INTO movie_genres (genre_name) VALUES ('Fantasy');
+INSERT INTO movie_genres (genre_name) VALUES ('Family');
+INSERT INTO movie_genres (genre_name) VALUES ('Film-Noir');
+INSERT INTO movie_genres (genre_name) VALUES ('Horror');
+INSERT INTO movie_genres (genre_name) VALUES ('Musical');
+INSERT INTO movie_genres (genre_name) VALUES ('Mystery');
+INSERT INTO movie_genres (genre_name) VALUES ('Romance');
+INSERT INTO movie_genres (genre_name) VALUES ('Sci-Fi');
+INSERT INTO movie_genres (genre_name) VALUES ('Short');
+INSERT INTO movie_genres (genre_name) VALUES ('Thriller');
+INSERT INTO movie_genres (genre_name) VALUES ('War');
+INSERT INTO movie_genres (genre_name) VALUES ('Western');
