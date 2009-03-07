@@ -34,7 +34,7 @@ import com.blipnetworks.sql.DataSourceManager;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.22 2009/03/07 22:33:37 jklett Exp $
+ * @version $Id: Daemon.java,v 1.23 2009/03/07 22:50:14 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -80,7 +80,8 @@ public class Daemon implements Runnable {
 
     public Daemon() {
         state = State.NO_GAME;
-        timetestmode = true;
+        // TODO: make configurable
+        timetestmode = false;
         tweettestmode = false;
         // Register our shutdown hook
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -331,6 +332,7 @@ public class Daemon implements Runnable {
 
     private void gatherReplies(Game game) {
         Twitter twitter = new Twitter(username, password);
+        // Start pulling pages of replies from Twitter
         for (int i = 1; i < Integer.MAX_VALUE; i++) {
             List<Status> replies = new ArrayList<Status>();
             try {
@@ -342,6 +344,9 @@ public class Daemon implements Runnable {
                 break;
             }
             for (Status reply : replies) {
+                // If this reply is older than the start time of the current game, ignore it
+                if (reply.getCreatedAt().before(game.getStartTime()))
+                    continue;
                 // Record the guess
                 Connection masterConnection = null;
                 Connection slaveConnection = null;
