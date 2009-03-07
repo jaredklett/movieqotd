@@ -30,7 +30,7 @@ import java.util.*;
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.5 2009/03/07 21:23:09 jklett Exp $
+ * @version $Id: Game.java,v 1.6 2009/03/07 23:25:18 jklett Exp $
  */
 
 public class Game {
@@ -156,6 +156,8 @@ public class Game {
 
     private Date getTimeAsDate(String time) {
         Calendar now = Calendar.getInstance();
+        int todayOfYear = now.get(Calendar.DAY_OF_YEAR);
+        int year = now.get(Calendar.YEAR);
         Date date;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm ZZZ");
         try {
@@ -166,9 +168,9 @@ public class Game {
         }
         Calendar then = Calendar.getInstance();
         then.setTime(date);
-        now.set(Calendar.HOUR_OF_DAY, then.get(Calendar.HOUR_OF_DAY));
-        now.set(Calendar.MINUTE, then.get(Calendar.MINUTE));
-        return now.getTime();
+        then.set(Calendar.DAY_OF_YEAR, todayOfYear + 1);
+        then.set(Calendar.YEAR, year);
+        return then.getTime();
     }
 
     public Quotes getQuote() {
