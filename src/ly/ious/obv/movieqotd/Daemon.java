@@ -27,13 +27,14 @@ import java.util.regex.Pattern;
 
 import ly.ious.obv.movieqotd.model.People;
 import ly.ious.obv.movieqotd.model.Winners;
+import ly.ious.obv.movieqotd.model.Guesses;
 import com.blipnetworks.sql.DataSourceManager;
 
 /**
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.21 2009/03/07 21:23:09 jklett Exp $
+ * @version $Id: Daemon.java,v 1.22 2009/03/07 22:33:37 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -341,6 +342,25 @@ public class Daemon implements Runnable {
                 break;
             }
             for (Status reply : replies) {
+                // Record the guess
+                Connection masterConnection = null;
+                Connection slaveConnection = null;
+                try {
+                    masterConnection = DataSourceManager.getMasterConnection("obviously");
+                    slaveConnection = DataSourceManager.getSlaveConnection("obviously");
+                    People player = People.getPeopleByName(slaveConnection, reply.getUser().getScreenName());
+                    if (player == null) {
+                        People.create(masterConnection, reply.getUser().getScreenName());
+                        player = People.getPeopleByName(slaveConnection, reply.getUser().getScreenName());
+                    }
+                    Guesses.create(masterConnection, game.getQuote().getQuoteId(), player.getPid(), reply.getText(), reply.getCreatedAt());
+                } catch (SQLException e) {
+                    log.error("Caught exception while trying to update winners!", e);
+                } finally {
+                    try { if (masterConnection != null) masterConnection.close(); } catch (SQLException e) { /* ignored */ }
+                    try { if (slaveConnection != null) slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
+                }
+                // Now see if the guess is correct
                 String title = game.getMovie().getMovieTitle();
                 // be forgiving, i.e. "A Fish Called Wanda" / "Fish Called Wanda"
                 if (title.startsWith("A") || title.startsWith("An") || title.startsWith("The")) {

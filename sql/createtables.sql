@@ -29,6 +29,14 @@ CREATE TABLE movie_winners (
     datestamp DATETIME NOT NULL
 ) ENGINE=InnoDb;
 
+CREATE TABLE movie_guesses (
+    movie_guess_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    quote_id INT NOT NULL,
+    person_id INT NOT NULL,
+    guess_text VARCHAR(255) NOT NULL,
+    datestamp DATETIME NOT NULL
+) ENGINE=InnoDb;
+
 CREATE TABLE trivia_questions (
     trivia_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
