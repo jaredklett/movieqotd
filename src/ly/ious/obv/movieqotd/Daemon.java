@@ -33,7 +33,7 @@ import com.blipnetworks.sql.DataSourceManager;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.19 2009/03/07 20:45:21 jklett Exp $
+ * @version $Id: Daemon.java,v 1.20 2009/03/07 20:50:22 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -278,7 +278,7 @@ public class Daemon implements Runnable {
                             }
                             Winners.create(masterConnection, winnerPerson.getPid(), game.getQuote().getQuoteId());
                         } catch (SQLException e) {
-                            log.error("Caught exception while trying to update ");
+                            log.error("Caught exception while trying to update winners!", e);
                         } finally {
                             try { if (masterConnection != null) masterConnection.close(); } catch (SQLException e) { /* ignored */ }
                             try { if (slaveConnection != null) slaveConnection.close(); } catch (SQLException e) { /* ignored */ }
