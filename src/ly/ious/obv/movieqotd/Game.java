@@ -30,7 +30,7 @@ import java.util.*;
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.6 2009/03/07 23:25:18 jklett Exp $
+ * @version $Id: Game.java,v 1.7 2009/03/09 03:06:28 jklett Exp $
  */
 
 public class Game {
@@ -143,18 +143,18 @@ public class Game {
 // Accessors //////////////////////////////////////////////////////////////////
 
     public Date getAnnounceTime() {
-        return getTimeAsDate(announceTime);
+        return getTimeAsDate(announceTime, true);
     }
 
     public Date getStartTime() {
-        return getTimeAsDate(startTime);
+        return getTimeAsDate(startTime, false);
     }
 
     public long getTimeBetweenRounds() {
         return timeBetweenRounds;
     }
 
-    private Date getTimeAsDate(String time) {
+    private Date getTimeAsDate(String time, boolean tomorrow) {
         Calendar now = Calendar.getInstance();
         int todayOfYear = now.get(Calendar.DAY_OF_YEAR);
         int year = now.get(Calendar.YEAR);
@@ -168,7 +168,7 @@ public class Game {
         }
         Calendar then = Calendar.getInstance();
         then.setTime(date);
-        then.set(Calendar.DAY_OF_YEAR, todayOfYear + 1);
+        then.set(Calendar.DAY_OF_YEAR, tomorrow ? todayOfYear + 1 : todayOfYear);
         then.set(Calendar.YEAR, year);
         return then.getTime();
     }
