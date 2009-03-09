@@ -30,7 +30,7 @@ import java.util.*;
  * Encapsulates information about a game.
  *
  * @author Jared Klett
- * @version $Id: Game.java,v 1.7 2009/03/09 03:06:28 jklett Exp $
+ * @version $Id: Game.java,v 1.8 2009/03/09 03:10:07 jklett Exp $
  */
 
 public class Game {
@@ -56,6 +56,7 @@ public class Game {
     public static final String PROPERTY_ANNOUNCE_TIME = "announce.time";
     public static final String PROPERTY_START_TIME = "start.time";
     public static final String PROPERTY_TIME_BETWEEN_ROUNDS = "time.between.rounds";
+    public static final String PROPERTY_TIME_BEFORE_WINNER = "time.before.winner";
     public static final String PROPERTY_SITE = "site";
 
     /** TODO */
@@ -65,11 +66,14 @@ public class Game {
     /** TODO */
     private static long timeBetweenRounds;
     /** TODO */
+    private static long timeBeforeWinner;
+    /** TODO */
     private static String site;
 
     public static final String DEFAULT_ANNOUNCE_TIME = "13:00 EST";
     public static final String DEFAULT_START_TIME = "14:00 EST";
     public static final long DEFAULT_TIME_BETWEEN_ROUNDS = 60 * 60 * 1000L;
+    public static final long DEFAULT_TIME_BEFORE_WINNER = 60 * 1000L;
     public static final String DEFAULT_SITE = "obviously";
 
 // Instance initializer ///////////////////////////////////////////////////////
@@ -94,6 +98,7 @@ public class Game {
             announceTime = config.stringProperty(PROPERTY_ANNOUNCE_TIME, DEFAULT_ANNOUNCE_TIME);
             startTime = config.stringProperty(PROPERTY_START_TIME, DEFAULT_START_TIME);
             timeBetweenRounds = config.longProperty(PROPERTY_TIME_BETWEEN_ROUNDS, DEFAULT_TIME_BETWEEN_ROUNDS);
+            timeBeforeWinner = config.longProperty(PROPERTY_TIME_BEFORE_WINNER, DEFAULT_TIME_BEFORE_WINNER);
             site = config.stringProperty(PROPERTY_SITE, DEFAULT_SITE);
         }
 
@@ -101,6 +106,7 @@ public class Game {
         log.info(PROPERTY_ANNOUNCE_TIME + " = " + announceTime);
         log.info(PROPERTY_START_TIME + " = " + startTime);
         log.info(PROPERTY_TIME_BETWEEN_ROUNDS + " = " + timeBetweenRounds);
+        log.info(PROPERTY_TIME_BEFORE_WINNER + " = " + timeBeforeWinner);
         log.info(PROPERTY_SITE + " = " + site);
     }
 
@@ -152,6 +158,10 @@ public class Game {
 
     public long getTimeBetweenRounds() {
         return timeBetweenRounds;
+    }
+
+    public long getTimeBeforeWinner() {
+        return timeBeforeWinner;
     }
 
     private Date getTimeAsDate(String time, boolean tomorrow) {

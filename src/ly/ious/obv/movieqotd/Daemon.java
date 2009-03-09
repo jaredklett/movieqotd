@@ -34,7 +34,7 @@ import com.blipnetworks.sql.DataSourceManager;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.23 2009/03/07 22:50:14 jklett Exp $
+ * @version $Id: Daemon.java,v 1.24 2009/03/09 03:10:07 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -179,6 +179,7 @@ public class Daemon implements Runnable {
                     if (game.getWinnerList().size() > 0) {
                         // we have a winner!
                         state = State.ANNOUNCE_WINNER;
+                        sleepTime = game.getTimeBeforeWinner();
                         break;
                     }
 
@@ -210,6 +211,7 @@ public class Daemon implements Runnable {
                     if (game.getWinnerList().size() > 0) {
                         // we have a winner!
                         state = State.ANNOUNCE_WINNER;
+                        sleepTime = game.getTimeBeforeWinner();
                         break;
                     }
 
@@ -252,6 +254,8 @@ public class Daemon implements Runnable {
                         // we have one or more winners
                         state = State.ANNOUNCE_WINNER;
                     }
+
+                    sleepTime = game.getTimeBeforeWinner();
 
                     break;
 
@@ -315,6 +319,8 @@ public class Daemon implements Runnable {
                     }
 
                     state = State.NO_GAME;
+                    // Wait 5 minutes and set up the next game
+                    sleepTime = 5 * 60 * 1000L;
 
                     break;
 
