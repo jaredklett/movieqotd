@@ -4,6 +4,7 @@
     <Call name="addListener">
         <Arg>
             <New class="org.mortbay.http.SocketListener">
+	        <Set name="Host">localhost</Set>
                 <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
                 <Set name="PoolName">P1</Set>
                 <Set name="MinThreads">20</Set>
