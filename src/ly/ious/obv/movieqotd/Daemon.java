@@ -34,7 +34,7 @@ import com.blipnetworks.sql.DataSourceManager;
  * A class that runs as a thread.
  *
  * @author Jared Klett
- * @version $Id: Daemon.java,v 1.24 2009/03/09 03:10:07 jklett Exp $
+ * @version $Id: Daemon.java,v 1.25 2009/03/16 19:42:46 jklett Exp $
  */
 
 public class Daemon implements Runnable {
@@ -281,8 +281,8 @@ public class Daemon implements Runnable {
                     Map<String,String> awMap = new HashMap<String,String>();
                     awMap.put("$MOVIETITLE$", game.getMovie().getMovieTitle());
 
-                    User winnerUser = game.getWinnerList().get(0).getUser();
                     if (!noWinner) {
+                        User winnerUser = game.getWinnerList().get(0).getUser();
                         // Create the person if necessary and add them to the winners table
                         Connection masterConnection = null;
                         Connection slaveConnection = null;
